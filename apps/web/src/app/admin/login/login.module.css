@@ -1,0 +1,22 @@
+.shell { min-height:100svh; display:grid; place-items:center; padding:24px; background:linear-gradient(120deg,rgba(49,38,30,.86),rgba(49,38,30,.5)),url('/images/uppadar-hollie/hero.jpg') center/cover fixed; }
+.card { width:min(100%,460px); padding:clamp(30px,6vw,50px); border:1px solid rgba(183,138,67,.3); border-radius:24px; background:rgba(255,253,250,.96); box-shadow:0 32px 100px rgba(34,24,17,.42); backdrop-filter:blur(14px); }
+.brand { display:flex; align-items:center; gap:13px; color:#302a25; }
+.brand > img { width:48px; height:48px; object-fit:cover; border-radius:50%; box-shadow:0 0 0 3px #f1e3d4; }
+.brand strong,.brand small { display:block; }
+.brand strong { font-family:var(--font-display),serif; font-size:22px; font-weight:500; }
+.brand small { margin-top:4px; color:#8b642c; font-size:8px; letter-spacing:.14em; text-transform:uppercase; }
+.copy { margin:48px 0 28px; }
+.copy p { margin:0 0 10px; color:#8b642c; font-size:9px; font-weight:800; letter-spacing:.2em; }
+.copy h1 { margin:0; color:#302a25; font-family:var(--font-display),serif; font-size:52px; font-weight:500; letter-spacing:-.03em; }
+.copy span { display:block; margin-top:12px; color:#746a61; font-size:12px; line-height:1.7; }
+.form { display:grid; gap:17px; }
+.form label { display:grid; gap:7px; }
+.form label span { color:#51463d; font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.form input { min-height:50px; border:1px solid #ded1c2; border-radius:10px; padding:0 14px; background:#fffdfa; font:inherit; }
+.form input:focus { outline:3px solid rgba(216,166,162,.3); border-color:#b78a43; }
+.form button { min-height:52px; border:0; border-radius:999px; background:#b78a43; color:white; font-weight:800; cursor:pointer; box-shadow:0 10px 26px rgba(139,100,44,.2); }
+.form button:hover { background:#8b642c; }
+.form button:disabled { opacity:.65; }
+.error { padding:12px 14px; border-radius:10px; background:#fff0ed; color:#9c3f2e; font-size:11px; line-height:1.5; }
+.help { display:block; margin-top:24px; color:#8b8178; font-size:9px; line-height:1.7; }
+@media (max-width:520px) { .shell { align-items:end; padding:0; } .card { width:100%; border-radius:24px 24px 0 0; padding:34px 22px calc(30px + env(safe-area-inset-bottom)); } .copy { margin:38px 0 24px; } .copy h1 { font-size:46px; } }

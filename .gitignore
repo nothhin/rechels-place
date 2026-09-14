@@ -1,0 +1,30 @@
+node_modules/
+.next/
+.netlify/
+dist/
+coverage/
+.env
+.env.local
+.env.*.local
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+.codex-*
+.legacy-app-git/
+.legacy-vercel-casa/
+.mcp.json
+work/
+supabase/.temp/
+# Deployment commits use the repository owner's GitHub identity.
+
+# Previous property research retained locally, never published with SnowAZ.
+apps/web/public/images/casa-marga/
+apps/web/public/images/snowaz/
+docs/booking-com-reference.md
+docs/business-research.md
+resort-booking-architecture.md
+resort-booking-sdlc-plan.md
+
+.vercel
+.env*

@@ -1,0 +1,69 @@
+.shell { min-height: 100vh; background: #fffaf3; color: #1b263b; }
+.header { min-height: 84px; padding: 0 clamp(22px, 6vw, 92px); background: #1b263b; color: white; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.brand { display: flex; align-items: center; gap: 12px; font-family: var(--font-display), serif; font-size: 21px; }
+.brand span { width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.8); border-radius: 50%; display: grid; place-items: center; font-size: 13px; }
+.backLink { font-size: 13px; color: rgba(255,255,255,.78); }
+.searchSection { padding: 70px clamp(22px, 6vw, 92px) 42px; background: #f3eadc; }
+.eyebrow { margin: 0 0 12px; color: #b85f3d; text-transform: uppercase; letter-spacing: .18em; font-size: 11px; font-weight: 800; }
+.searchSection h1, .invalidState h1 { margin: 0; font-family: var(--font-display), serif; font-weight: 500; font-size: clamp(48px, 7vw, 78px); line-height: 1; }
+.searchSection > div > p:last-child { color: #596b72; font-weight: 600; }
+.searchBar { margin-top: 34px; display: grid; grid-template-columns: 1fr 1fr .65fr auto; gap: 1px; background: #d8cdbd; border: 1px solid #d8cdbd; box-shadow: 0 12px 30px rgba(23,46,56,.09); }
+.searchBar label { padding: 15px 18px; background: white; display: grid; gap: 6px; }
+.searchBar label span { font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.searchBar input { border: 0; background: transparent; color: #172e38; min-height: 30px; min-width: 0; }
+.searchBar button { border: 0; padding: 0 28px; background: #b85f3d; color: white; font-weight: 800; cursor: pointer; }
+.resultsSection { padding: 70px clamp(22px, 6vw, 92px); }
+.resultsHeading { display: grid; grid-template-columns: 1.3fr .7fr; align-items: end; gap: 50px; margin-bottom: 32px; }
+.resultsHeading h2 { margin: 0; font-family: var(--font-display), serif; font-size: clamp(36px, 5vw, 55px); font-weight: 500; line-height: 1.05; }
+.resultsHeading > p { color: #68777c; line-height: 1.7; font-size: 13px; }
+.resultsLayout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; align-items: start; }
+.filters { position: sticky; top: 24px; padding: 24px; background: white; border: 1px solid #e5dccf; border-radius: 12px; box-shadow: 0 8px 24px rgba(27,38,59,.06); }
+.filters h3 { margin: 0 0 24px; font-family: var(--font-display), serif; font-size: 28px; font-weight: 500; }
+.filters fieldset { display: grid; gap: 12px; margin: 0; padding: 20px 0; border: 0; border-top: 1px solid #eee5d8; }
+.filters legend { padding-top: 18px; margin-bottom: 10px; font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.filters label { display: flex; align-items: center; gap: 9px; color: #536474; font-size: 13px; }
+.filters input { accent-color: #a45332; }
+.filterNote { margin: 16px 0 0; color: #7b8790; font-size: 10px; line-height: 1.6; }
+.roomList { display: grid; gap: 22px; }
+.roomCard { display: grid; grid-template-columns: minmax(260px, .72fr) 1.28fr; background: white; border: 1px solid #e5dccf; border-radius: 12px; overflow: hidden; min-height: 315px; box-shadow: 0 8px 28px rgba(27,38,59,.06); }
+.roomImage { min-height: 315px; position: relative; overflow: hidden; background: #ddd5ca; }
+.roomImage img { object-fit: cover; }
+.roomDetails { padding: 32px; display: flex; flex-direction: column; }
+.capacity { margin: 0; color: #b85f3d; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .14em; }
+.roomDetails h3 { margin: 10px 0 14px; font-family: var(--font-display), serif; font-size: 34px; font-weight: 500; }
+.roomDetails ul { display: flex; flex-wrap: wrap; gap: 8px 22px; list-style: none; padding: 0; margin: 0; color: #65747a; font-size: 13px; }
+.roomDetails li::before { content: "·"; color: #b85f3d; margin-right: 8px; }
+.roomAction { margin-top: auto; padding-top: 26px; border-top: 1px solid #eee5d8; display: flex; justify-content: space-between; align-items: end; gap: 20px; }
+.roomAction div { display: grid; gap: 5px; }
+.roomAction small { color: #748087; }
+.roomAction button { min-height: 45px; border: 0; background: #d6d1c9; color: #6e7475; padding: 0 20px; font-weight: 800; cursor: not-allowed; }
+.requestButton { min-height: 45px; padding: 0 20px; background: #b85f3d; color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; }
+.notice { margin: 0 clamp(22px, 6vw, 92px) 70px; padding: 24px 28px; border-left: 4px solid #b85f3d; background: #f3eadc; display: grid; grid-template-columns: auto 1fr; gap: 24px; font-size: 13px; line-height: 1.6; }
+.footer { padding: 42px clamp(22px, 6vw, 92px); background: #102831; color: white; display: flex; justify-content: space-between; gap: 24px; font-size: 12px; }
+.footer span { color: rgba(255,255,255,.65); }
+.invalidState { min-height: calc(100vh - 84px); padding: 90px clamp(22px, 10vw, 150px); }
+.invalidState > p:not(.eyebrow) { color: #64747a; max-width: 650px; line-height: 1.7; }
+.emptyState { padding: 50px; background: white; border: 1px solid #e5dccf; text-align: center; }
+
+@media (max-width: 760px) {
+  .header { min-height: 72px; }
+  .brand strong { display: none; }
+  .searchSection { padding: 42px 16px 30px; }
+  .searchSection h1, .invalidState h1 { font-size: 46px; }
+  .searchBar { grid-template-columns: 1fr; }
+  .searchBar button { min-height: 50px; }
+  .resultsSection { padding: 48px 16px; }
+  .resultsHeading, .resultsLayout, .roomCard { grid-template-columns: 1fr; }
+  .resultsHeading { gap: 12px; }
+  .filters { position: static; padding: 20px; }
+  .filters fieldset { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filters legend { grid-column: 1 / -1; }
+  .roomImage { min-height: 260px; }
+  .roomDetails { min-height: 0; padding: 22px; }
+  .roomDetails h3 { font-size: 29px; }
+  .roomAction { align-items: stretch; flex-direction: column; }
+  .roomAction button { width: 100%; }
+  .requestButton { width: 100%; box-sizing: border-box; }
+  .notice { margin: 0 16px 48px; grid-template-columns: 1fr; }
+  .footer { padding: 34px 16px; grid-template-columns: 1fr; flex-direction: column; }
+}
