@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import {
   calculateSnowazBookingReceipt,
   RECHELS_PLACE_REFUNDABLE_SECURITY_DEPOSIT_MINOR,
 } from "@uppadar-hollie/shared/booking";
+import { propertyLogoSrc } from "@/lib/property";
 
 const php = new Intl.NumberFormat("en-PH", {
   style: "currency",
@@ -87,10 +89,7 @@ export default function BookingPriceReceipt({
       aria-label="Calculated booking payment"
     >
       <header>
-        <div>
-          <small>Rechel’s Place</small>
-          <strong>Digital booking receipt</strong>
-        </div>
+        <div className="booking-receipt-brand"><Image src={propertyLogoSrc} alt="" width={38} height={38} /><span><small>Rechel’s Place</small><strong>Digital booking receipt</strong></span></div>
         <span>Estimate</span>
       </header>
       <dl>

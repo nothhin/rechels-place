@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { propertyProfile } from "@/lib/property";
+import { propertyLogoSrc, propertyProfile } from "@/lib/property";
 import { DeviceBookingStatus } from "./DeviceBookingStatus";
 
 export const metadata: Metadata = {
@@ -11,7 +12,7 @@ export default function BookingStatusPage() {
   return (
     <main className="booking-status-shell">
       <header>
-        <Link href="/">Rechel’s Place</Link>
+        <Link href="/" className="booking-status-brand"><Image src={propertyLogoSrc} alt="" width={46} height={46} /><span>Rechel’s Place</span></Link>
         <span>Private status on this device</span>
       </header>
       <article className="booking-status-card">

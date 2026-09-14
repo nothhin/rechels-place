@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { propertyProfile } from "@/lib/property";
+import { propertyLogoSrc, propertyProfile } from "@/lib/property";
 
 export const metadata: Metadata = {
   title: "Privacy Notice | Rechel's Place",
@@ -12,7 +13,7 @@ export default function PrivacyPage() {
   return (
     <main className="legal-shell">
       <header className="legal-header">
-        <Link href="/">Rechel’s Place</Link>
+        <Link href="/" className="legal-brand"><Image src={propertyLogoSrc} alt="" width={46} height={46} /><span>Rechel’s Place</span></Link>
         <Link href="/#availability">Back to availability</Link>
       </header>
       <article className="legal-content">

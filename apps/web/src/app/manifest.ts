@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { propertyLogoSrc } from "@/lib/property";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -12,9 +13,9 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#4a2d24",
     icons: [
       {
-        src: "/images/rechel-s-place/logo.svg",
-        sizes: "200x200",
-        type: "image/svg+xml",
+        src: propertyLogoSrc,
+        sizes: "1280x1280",
+        type: "image/png",
         purpose: "any",
       },
     ],

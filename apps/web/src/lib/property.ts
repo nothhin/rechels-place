@@ -1,3 +1,5 @@
+export const propertyLogoSrc = "/images/rechel-s-place/rechels-place-logo.png" as const;
+
 export const propertyProfile = {
   displayName: "Rechel's Place CDO",
   shortName: "Rechel's Place",

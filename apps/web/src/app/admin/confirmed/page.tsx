@@ -8,6 +8,7 @@ import { AdminBottomNav, AdminMobileNav, AdminNav } from "../AdminNav";
 import { AdminLiveRefresh } from "../AdminLiveRefresh";
 import { ConfirmedBookingsPanel } from "../ConfirmedBookingsPanel";
 import type { AdminEnquiry } from "../BookingRequestsPanel";
+import { propertyLogoSrc } from "@/lib/property";
 import styles from "../admin.module.css";
 
 export const metadata: Metadata = {
@@ -36,7 +37,7 @@ export default async function ConfirmedBookingsPage() {
   return <main className={styles.dashboardShell}>
     <aside className={styles.sidebar}>
       <Link className={styles.adminBrand} href="/">
-        <Image src="/images/rechel-s-place/logo.svg" alt="Rechel's Place" width={48} height={48}/>
+        <Image src={propertyLogoSrc} alt="Rechel's Place" width={48} height={48}/>
         <div><strong>Rechel’s Place</strong><small>Host workspace</small></div>
       </Link>
       <AdminNav activeClassName={styles.activeNav}/>

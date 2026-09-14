@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { propertyProfile } from "@/lib/property";
+import { propertyLogoSrc, propertyProfile } from "@/lib/property";
 import { requireStaff } from "@/lib/server/admin-auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { signOut } from "../actions";
@@ -84,7 +84,7 @@ export default async function OperationsPage() {
       <aside className={styles.sidebar}>
         <Link className={styles.adminBrand} href="/">
           <Image
-            src="/images/rechel-s-place/logo.svg"
+            src={propertyLogoSrc}
             alt=""
             width={48}
             height={48}

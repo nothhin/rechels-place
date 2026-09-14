@@ -7,7 +7,7 @@ import {
   submitBookingRequestInline,
   type BookingActionState,
 } from "./book/actions";
-import { propertyProfile } from "@/lib/property";
+import { propertyLogoSrc, propertyProfile } from "@/lib/property";
 import { showError, showSuccess } from "@/lib/sweetalert";
 import { RememberBooking, rememberBooking } from "./BookingMemory";
 import UiIcon from "./UiIcon";
@@ -135,7 +135,7 @@ export default function BookingModal({
         <header className="booking-modal-brandbar">
           <div>
             <Image
-              src="/images/rechel-s-place/logo.svg"
+              src={propertyLogoSrc}
               alt=""
               width={38}
               height={38}

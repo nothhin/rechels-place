@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import { propertyLogoSrc } from "@/lib/property";
 
 export const metadata: Metadata = { title: "Cookie Notice | Rechel's Place", description: "Rechel's Place's essential-cookie and tracking notice." };
 
 export default function CookiesPage() {
   return <main className="legal-shell">
-    <header className="legal-header"><Link href="/">Rechel’s Place</Link><Link href="/#availability">Back to availability</Link></header>
+    <header className="legal-header"><Link href="/" className="legal-brand"><Image src={propertyLogoSrc} alt="" width={46} height={46} /><span>Rechel’s Place</span></Link><Link href="/#availability">Back to availability</Link></header>
     <article className="legal-content">
       <p className="eyebrow">Website storage and tracking</p><h1>Cookie Notice</h1><p className="legal-updated">Effective and last updated: August 10, 2026</p>
       <section><h2>Our current use of cookies</h2><p>The public Rechel’s Place booking site does not currently use advertising, analytics, or marketing cookies. Only essential cookies or similar storage may be used when necessary for secure operation, such as protecting and maintaining staff or administrator login sessions.</p></section>

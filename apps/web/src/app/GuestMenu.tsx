@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
-import { propertyProfile } from "@/lib/property";
+import { propertyLogoSrc, propertyProfile } from "@/lib/property";
 import { useSavedBooking } from "./BookingMemory";
 
 export default function GuestMenu() {
@@ -29,7 +30,7 @@ export default function GuestMenu() {
     <button className="guest-menu-toggle" type="button" aria-label="Open guest menu" aria-expanded={open} aria-controls={drawerId} onClick={() => setOpen(true)}><span /><span /><span /></button>
     {open ? <div className="guest-menu-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
       <aside className="guest-menu-drawer" id={drawerId} aria-label="Guest menu">
-        <header><div><small>Guest services</small><strong>Rechel’s Place</strong></div><button type="button" aria-label="Close guest menu" onClick={close}>×</button></header>
+        <header><div className="guest-menu-brand"><Image src={propertyLogoSrc} alt="" width={52} height={52} /><span><small>Guest services</small><strong>Rechel’s Place</strong></span></div><button type="button" aria-label="Close guest menu" onClick={close}>×</button></header>
         <nav>
           <Link href="/" onClick={close}><span>01</span><div><strong>Home</strong><small>Property details and amenities</small></div></Link>
           <Link href="/#availability" onClick={close}><span>02</span><div><strong>Book available dates</strong><small>Open the live availability calendar</small></div></Link>

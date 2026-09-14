@@ -18,6 +18,22 @@
   font-family: var(--font-display), serif;
   font-size: 22px;
 }
+.shell > header .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.shell > header .brand img {
+  flex: 0 0 auto;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #f7f0e6;
+}
+.shell > header .brand span {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
 .shell > header span {
   color: #d7cabd;
   font-size: 11px;

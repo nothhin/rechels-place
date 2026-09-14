@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { propertyProfile } from "@/lib/property";
+import { propertyLogoSrc, propertyProfile } from "@/lib/property";
 import { requireStaff } from "@/lib/server/admin-auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
@@ -90,7 +90,7 @@ export default async function AdminDashboard({
     <main className={styles.dashboardShell}>
       <aside className={styles.sidebar}>
         <Link className={styles.adminBrand} href="/">
-          <Image src="/images/rechel-s-place/logo.svg" alt="Rechel's Place" width={58} height={58} />
+          <Image src={propertyLogoSrc} alt="Rechel's Place" width={58} height={58} />
           <div>
             <strong>Rechel’s Place</strong>
             <small>Host workspace · Cagayan de Oro</small>

@@ -15,6 +15,7 @@ import {
   heroImages,
   nearbyPlaces,
   propertyProfile,
+  propertyLogoSrc,
   reviewSummary,
   serviceContacts,
   stayDetails,
@@ -35,7 +36,7 @@ export default function Home() {
     <main className="pwa-site" id="home">
       <header className="pwa-header">
         <a className="pwa-logo" href="#home">
-          <Image src="/images/rechel-s-place/logo.svg" alt="Rechel’s Place" width={42} height={42} />
+          <Image src={propertyLogoSrc} alt="Rechel’s Place" width={42} height={42} />
           <span><strong>Rechel’s Place</strong><small>CDO condo stay</small></span>
         </a>
         <span className="pwa-online"><i /> Online</span>
@@ -142,9 +143,9 @@ export default function Home() {
         <div className="pwa-returning"><strong>Already sent a request?</strong><SavedBookingLink /></div>
       </section>
 
-      <section className="pwa-host"><Image src="/images/rechel-s-place/logo.svg" alt="Rechel’s Place logo" width={110} height={110} /><div><small>DIRECT OWNER ASSISTANCE</small><h2>Questions before booking?</h2><p>Talk directly with Rechel about availability, current pricing, policies, and anything you need for a comfortable CDO stay.</p><div className="pwa-host-links"><a href={propertyProfile.messengerUrl} target="_blank" rel="noreferrer">Chat on Facebook →</a><a href={propertyProfile.airbnbUrl} target="_blank" rel="noreferrer">View Airbnb listing →</a></div></div></section>
+      <section className="pwa-host"><Image src={propertyLogoSrc} alt="Rechel’s Place logo" width={110} height={110} /><div><small>DIRECT OWNER ASSISTANCE</small><h2>Questions before booking?</h2><p>Talk directly with Rechel about availability, current pricing, policies, and anything you need for a comfortable CDO stay.</p><div className="pwa-host-links"><a href={propertyProfile.messengerUrl} target="_blank" rel="noreferrer">Chat on Facebook →</a><a href={propertyProfile.airbnbUrl} target="_blank" rel="noreferrer">View Airbnb listing →</a></div></div></section>
 
-      <footer className="pwa-footer"><div className="pwa-logo"><Image src="/images/rechel-s-place/logo.svg" alt="" width={38} height={38} /><span><strong>Rechel’s Place</strong><small>{propertyProfile.tagline}</small></span></div><div><a href={propertyProfile.facebookUrl} target="_blank" rel="noreferrer">Facebook</a><a href={propertyProfile.airbnbUrl} target="_blank" rel="noreferrer">Airbnb</a><Link href="/privacy">Privacy</Link><Link href="/cookies">Cookies</Link><span>© {new Date().getFullYear()}</span></div></footer>
+      <footer className="pwa-footer"><div className="pwa-logo"><Image src={propertyLogoSrc} alt="" width={38} height={38} /><span><strong>Rechel’s Place</strong><small>{propertyProfile.tagline}</small></span></div><div><a href={propertyProfile.facebookUrl} target="_blank" rel="noreferrer">Facebook</a><a href={propertyProfile.airbnbUrl} target="_blank" rel="noreferrer">Airbnb</a><Link href="/privacy">Privacy</Link><Link href="/cookies">Cookies</Link><span>© {new Date().getFullYear()}</span></div></footer>
 
       <nav className="pwa-bottom-nav" aria-label="Mobile navigation"><a href="#home"><span><UiIcon name="home" /></span>Explore</a><a href="#rooms"><span><UiIcon name="bed" /></span>Bedrooms</a><BookingLauncher className="pwa-bottom-book"><span><UiIcon name="calendar" /></span>Book</BookingLauncher><a href="#amenities"><span><UiIcon name="sparkles" /></span>Amenities</a><a href={propertyProfile.messengerUrl} target="_blank" rel="noreferrer"><span><UiIcon name="message" /></span>Host</a></nav>
     </main>

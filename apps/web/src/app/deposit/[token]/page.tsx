@@ -6,7 +6,7 @@ import {
   isValidDepositToken,
 } from "@/lib/server/deposit-token";
 import { createPublicSupabaseClient } from "@/lib/supabase/public-server";
-import { propertyProfile } from "@/lib/property";
+import { propertyLogoSrc, propertyProfile } from "@/lib/property";
 import { MessengerReceiptLink } from "../../MessengerReceiptLink";
 import { ForgetBookingIfMatches, RememberBooking } from "../../BookingMemory";
 import { BookingReferenceCard } from "../../BookingReferenceCard";
@@ -87,7 +87,7 @@ export default async function DepositPage({
     <main className={styles.shell}>
       <LiveRouteRefresh />
       <header>
-        <Link href="/">Rechel’s Place</Link>
+        <Link href="/" className={styles.brand}><Image src={propertyLogoSrc} alt="" width={46} height={46} /><span>Rechel’s Place</span></Link>
         <span>Live private booking status</span>
       </header>
       <article className={styles.card}>

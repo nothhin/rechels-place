@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { propertyLogoSrc } from "@/lib/property";
 
 const navigation = [
   { label: "Overview", href: "/admin#overview", id: "overview" },
@@ -49,7 +51,7 @@ export function AdminMobileNav({ classes }: { classes: MobileNavClasses }) {
     };
   }, [open]);
 
-  const drawer = open ? createPortal(<div className={classes.backdrop} role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setOpen(false);}}><aside id="mobile-admin-navigation" className={`${classes.drawer} ${classes.drawerOpen}`} role="dialog" aria-modal="true" aria-label="Host workspace navigation"><div className={classes.drawerHeader}><div><strong>Rechel’s Place</strong><small>Host workspace</small></div><button className={classes.closeButton} type="button" aria-label="Close host navigation" onClick={()=>setOpen(false)}>×</button></div><nav aria-label="Mobile host navigation">{navigation.map((item,index)=><Link prefetch className={active===item.id?classes.active:undefined} href={item.href} key={item.id} onClick={()=>setOpen(false)}><span aria-hidden="true">{String(index+1).padStart(2,"0")}</span>{item.label}</Link>)}</nav></aside></div>, document.body) : null;
+  const drawer = open ? createPortal(<div className={classes.backdrop} role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setOpen(false);}}><aside id="mobile-admin-navigation" className={`${classes.drawer} ${classes.drawerOpen}`} role="dialog" aria-modal="true" aria-label="Host workspace navigation"><div className={classes.drawerHeader}><div style={{ display: "flex", alignItems: "center", gap: 10 }}><Image src={propertyLogoSrc} alt="" width={42} height={42} style={{ objectFit: "contain", borderRadius: "50%", background: "#f7f0e6", flex: "0 0 auto" }} /><span><strong>Rechel’s Place</strong><small>Host workspace</small></span></div><button className={classes.closeButton} type="button" aria-label="Close host navigation" onClick={()=>setOpen(false)}>×</button></div><nav aria-label="Mobile host navigation">{navigation.map((item,index)=><Link prefetch className={active===item.id?classes.active:undefined} href={item.href} key={item.id} onClick={()=>setOpen(false)}><span aria-hidden="true">{String(index+1).padStart(2,"0")}</span>{item.label}</Link>)}</nav></aside></div>, document.body) : null;
 
   return <><button className={classes.button} type="button" aria-label="Open admin navigation" aria-expanded={open} aria-controls="mobile-admin-navigation" onClick={()=>setOpen(true)}><span aria-hidden="true"><i/><i/><i/></span></button>{drawer}</>;
 }
