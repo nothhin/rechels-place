@@ -27,16 +27,34 @@ export const propertyProfile = {
 } as const;
 
 export const galleryImages = [
-  { src: "/images/rechel-s-place/airbnb-bedroom-1.jpg", alt: "Primary bedroom with a queen bed and city view" },
-  { src: "/images/rechel-s-place/airbnb-living-room.jpg", alt: "Living room with sofa, 65-inch TV, and city view" },
-  { src: "/images/rechel-s-place/airbnb-bedroom-2.jpg", alt: "Second bedroom with a queen bed, desk, and city view" },
-  { src: "/images/rechel-s-place/airbnb-kitchen-dining.jpg", alt: "Open-plan kitchen, dining, and living area" },
-  { src: "/images/rechel-s-place/airbnb-kitchen.jpg", alt: "Fully equipped guest kitchen" },
+  { src: "/images/rechel-s-place/listing-01.webp", alt: "Living room with sofa, TV, dining area, and city view", label: "THE LIVING ROOM", title: "Room to settle in." },
+  { src: "/images/rechel-s-place/listing-13.webp", alt: "Living room looking toward the dining area and city-facing windows", label: "CITY-FACING WINDOWS", title: "Light from every angle." },
+  { src: "/images/rechel-s-place/listing-06.webp", alt: "Open dining area beside the kitchen", label: "DINING AREA", title: "Make room for everyone." },
+  { src: "/images/rechel-s-place/listing-16.webp", alt: "Bedroom with a bed beside a bright city view", label: "PRIMARY BEDROOM", title: "Wake up to the city." },
+  { src: "/images/rechel-s-place/listing-20.webp", alt: "Bedroom with a wide window and city skyline view", label: "A ROOM WITH A VIEW", title: "Slow mornings, higher up." },
+  { src: "/images/rechel-s-place/listing-04.webp", alt: "Primary bedroom prepared with a queen bed and folded towels", label: "PRIMARY BEDROOM", title: "Ready for a restful night." },
+  { src: "/images/rechel-s-place/listing-05.webp", alt: "Second bedroom with a bunk bed and storage", label: "SECOND BEDROOM", title: "Flexible sleeping space." },
+  { src: "/images/rechel-s-place/listing-10.webp", alt: "Guest kitchen with induction stove and counter space", label: "THE KITCHEN", title: "Cook at your own pace." },
+  { src: "/images/rechel-s-place/listing-09.webp", alt: "Dining table set beside the open kitchen", label: "SHARED MOMENTS", title: "Meals are better together." },
+  { src: "/images/rechel-s-place/listing-21.webp", alt: "Open-plan kitchen and dining area with natural light", label: "OPEN-PLAN LIVING", title: "Connected without feeling crowded." },
+  { src: "/images/rechel-s-place/listing-26.webp", alt: "Condo building and shared swimming pool viewed from above", label: "THE BUILDING", title: "A city stay with a pool." },
+  { src: "/images/rechel-s-place/listing-29.webp", alt: "Dining room and kitchen viewed from the living area", label: "THE WHOLE HOME", title: "Settle in together." },
+] as const;
+
+export const heroImages = [
+  galleryImages[0],
+  galleryImages[1],
+  galleryImages[2],
+  galleryImages[3],
+  galleryImages[4],
+  galleryImages[6],
+  galleryImages[7],
+  galleryImages[10],
 ] as const;
 
 export const galleryVideo = {
   src: "/images/rechel-s-place/rechel-place-tour.mp4",
-  poster: "/images/rechel-s-place/airbnb-living-room.jpg",
+  poster: "/images/rechel-s-place/airbnb-living-room.webp",
   alt: "Video walkthrough of Rechel's Place entire condo",
 } as const;
 
@@ -59,7 +77,7 @@ export const stayHighlights = [
   },
   {
     title: "Cook, connect, unwind",
-    copy: "Use the open-plan kitchen and dining area, work online with 31 Mbps Wi-Fi, and settle in with two TVs.",
+    copy: "Use the open-plan kitchen and dining area, work online with verified 31 Mbps Wi-Fi, and unwind with a 65-inch HDTV and Bluetooth sound system.",
   },
   {
     title: "Walkable and well connected",
@@ -69,61 +87,222 @@ export const stayHighlights = [
 
 export const amenityGroups = [
   {
-    title: "Sleeping arrangements",
+    title: "Scenic views",
+    icon: "map",
+    items: [
+      { name: "Bay view" },
+      { name: "City skyline view" },
+      { name: "Mountain view" },
+      { name: "Valley view" },
+    ],
+  },
+  {
+    title: "Bathroom",
+    icon: "shower",
+    items: [
+      { name: "Cleaning products" },
+      { name: "Shampoo" },
+      { name: "Conditioner" },
+      { name: "Safeguard body soap" },
+      { name: "Hot water" },
+    ],
+  },
+  {
+    title: "Bedroom and laundry",
     icon: "bed",
     items: [
-      { name: "Primary bedroom", detail: "1 queen bed" },
-      { name: "Second bedroom", detail: "1 queen bed, 1 sofa bed, 1 bunk bed, and 2 floor mattresses" },
-      { name: "2 bedrooms · 5 beds", detail: "Comfortable sleeping space for up to 6 guests" },
+      { name: "Free washer – In unit" },
+      { name: "Free dryer – In unit" },
+    ],
+  },
+  {
+    title: "Essentials",
+    icon: "bed",
+    items: [
+      { name: "Towels, bed sheets, soap, and toilet paper" },
+      { name: "Hangers" },
+      { name: "Bed linens" },
+      { name: "Room-darkening shades" },
+      { name: "Iron" },
+      { name: "Drying rack for clothing" },
+      { name: "Clothing storage" },
     ],
   },
   {
     title: "Entertainment",
     icon: "tv",
-    items: [{ name: "2 TVs" }, { name: "65-inch HDTV with Netflix" }],
+    items: [
+      { name: "65 inch HDTV with Netflix" },
+      { name: "Bluetooth sound system" },
+    ],
+  },
+  {
+    title: "Exercise equipment",
+    icon: "sparkles",
+    items: [{ name: "Exercise equipment" }],
+  },
+  {
+    title: "Heating and cooling",
+    icon: "snow",
+    items: [
+      { name: "Window AC unit" },
+      { name: "Indoor fireplace" },
+    ],
+  },
+  {
+    title: "Home safety",
+    icon: "lock",
+    items: [
+      { name: "Smoke alarm" },
+      { name: "Fire extinguisher" },
+      { name: "First aid kit" },
+    ],
   },
   {
     title: "Internet and office",
     icon: "wifi",
-    items: [{ name: "Wi-Fi", detail: "31 Mbps connection" }, { name: "Dedicated workspace" }],
+    items: [
+      { name: "Wi-Fi – 31 Mbps", detail: "Verified by speed test. Stream 4K videos and join video calls." },
+      { name: "Dedicated workspace", detail: "In a common space" },
+    ],
   },
   {
     title: "Kitchen and dining",
     icon: "kitchen",
     items: [
-      { name: "Fully equipped kitchen", detail: "Space where guests can cook their own meals" },
-      { name: "Open-plan dining and family space" },
-      { name: "Complimentary welcome treats", detail: "Fresh fruits, chocolates, biscuits, dried mangoes, and other goodies" },
+      { name: "Kitchen", detail: "Space where guests can cook their own meals" },
+      { name: "Refrigerator" },
+      { name: "Microwave" },
+      { name: "Cooking basics", detail: "Pots and pans, oil, salt and pepper" },
+      { name: "Dishes and silverware", detail: "Bowls, chopsticks, plates, cups, etc." },
+      { name: "Mini fridge" },
+      { name: "Freezer" },
+      { name: "Induction stove" },
+      { name: "Hot water kettle" },
+      { name: "Coffee maker: drip coffee maker" },
+      { name: "Wine glasses" },
+      { name: "Toaster" },
+      { name: "Rice maker" },
+      { name: "Dining table" },
     ],
   },
   {
-    title: "Building and location",
+    title: "Location features",
     icon: "pin",
+    items: [{ name: "Laundromat nearby" }],
+  },
+  {
+    title: "Parking and facilities",
+    icon: "home",
     items: [
-      { name: "Shared pool", detail: "Available year-round during building hours" },
       { name: "Free street parking" },
-      { name: "Elevator access" },
-      { name: "Bay and city skyline views" },
+      { name: "Shared pool", detail: "Available all year · open from 7:00 AM to 9:00 PM" },
+      { name: "Elevator", detail: "At least 52 inches deep with a doorway at least 32 inches wide" },
+      { name: "Shared gym in building" },
     ],
   },
   {
     title: "Services",
     icon: "lock",
-    items: [{ name: "Self check-in", detail: "Keypad entry" }],
-  },
-  {
-    title: "Home safety",
-    icon: "check",
-    items: [{ name: "Smoke alarm" }],
+    items: [
+      { name: "Long term stays allowed", detail: "Stay for 28 days or more" },
+      { name: "Self check-in", detail: "Keypad · check yourself into the home with a door code" },
+      { name: "Cleaning available during stay" },
+    ],
   },
 ] as const;
 
-export const unavailableAmenities = ["Carbon monoxide alarm"] as const;
+export const unavailableAmenities = [
+  { name: "Exterior security cameras on property", detail: "Unavailable at this property." },
+  { name: "Carbon monoxide alarm", detail: "This place may not have a carbon monoxide detector. Reach out to the host with any questions." },
+  { name: "Heating", detail: "Unavailable at this property." },
+] as const;
+
+export const reviewSummary = {
+  rating: "4.95",
+  ratingLabel: "Rated 4.95 out of 5 from 75 reviews.",
+  guestFavoriteTitle: "Guest favorite",
+  guestFavoriteCopy: "This home is in the top 10% of eligible listings based on ratings, reviews, and reliability.",
+  ratingDistribution: [
+    { label: "5 stars", percentage: 95 },
+    { label: "4 stars", percentage: 5 },
+    { label: "3 stars", percentage: 0 },
+    { label: "2 stars", percentage: 0 },
+    { label: "1 star", percentage: 0 },
+  ],
+  categoryRatings: [
+    { label: "Cleanliness", score: "4.9" },
+    { label: "Accuracy", score: "5.0" },
+    { label: "Check-in", score: "5.0" },
+    { label: "Communication", score: "5.0" },
+    { label: "Location", score: "4.9" },
+    { label: "Value", score: "4.9" },
+  ],
+  mentionedTopics: [
+    { label: "Cleanliness", count: 30 },
+    { label: "Comfort", count: 22 },
+    { label: "Hospitality", count: 45 },
+    { label: "View", count: 13 },
+    { label: "Location", count: 24 },
+    { label: "Nearby", count: 13 },
+    { label: "Indoor spaces", count: 9 },
+    { label: "Family", count: 14 },
+    { label: "Check-in", count: 8 },
+    { label: "Amenities", count: 5 },
+  ],
+} as const;
+
+export const guestReviews = [
+  {
+    author: "Amethyst",
+    tenure: "10 years on Airbnb",
+    date: "2 weeks ago",
+    context: "Repeat stay",
+    quote: "This is always our go-to Airbnb whenever we’re in CDO! We keep coming back every time, and we’ll definitely be staying here again. Thank you, Miss Rechel, for the complimentary food and for consistently keeping the place clean, cozy, and welcoming.",
+  },
+  {
+    author: "Vincent",
+    tenure: "9 years on Airbnb",
+    date: "July 2026",
+    context: "Family stay",
+    quote: "We absolutely loved our stay! It was super clean and felt like home as soon as we walked in. Every unit amenity worked as expected and provided what was essential to making the trip comfortable. The hosts were super flexible and helpful while we stayed.",
+  },
+  {
+    author: "Amethyst",
+    tenure: "10 years on Airbnb",
+    date: "June 2026",
+    context: "Repeat stay",
+    quote: "We stayed at Miss Rechel’s place again, and it was just as wonderful as our first stay. The place was spotless, and we really appreciated the complimentary snacks and fresh fruits. Miss Rechel was also very easy to communicate with and made sure everything was ready.",
+  },
+  {
+    author: "Jaysen",
+    tenure: "4 years on Airbnb",
+    date: "July 2026",
+    context: "Guest stay",
+    quote: "Complete amenities. Great place.",
+  },
+  {
+    author: "Christine",
+    tenure: "9 years on Airbnb",
+    date: "June 2026",
+    context: "Group trip",
+    quote: "Booked this place for our church group. They had a smooth, hassle-free, and comfortable stay. The location is the best part—it’s walkable to our conference venue, so there was no parking stress and no need for transportation.",
+  },
+  {
+    author: "Amethyst",
+    tenure: "10 years on Airbnb",
+    date: "May 2026",
+    context: "Repeat stay",
+    quote: "Miss Rechel’s place is truly a gem in CDO. It’s rare to find an Airbnb that is so well-maintained, exceptionally clean, and smells wonderfully fresh. The beds were incredibly comfortable, the linens felt soft and cozy, and the welcome fruits and snacks were a lovely touch.",
+  },
+] as const;
 
 export const buildingAmenities = [
   "Avida Aspira Tower 1",
-  "Shared pool and on-site gym",
+  "Shared pool · open 7:00 AM to 9:00 PM",
+  "Shared gym in building",
   "Elevator access",
+  "Free street parking",
   "12th-floor city and bay views",
 ] as const;
 

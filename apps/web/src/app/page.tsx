@@ -5,13 +5,17 @@ import UiIcon, { type IconName } from "./UiIcon";
 import { SavedBookingLink } from "./BookingMemory";
 import BookingLauncher from "./BookingLauncher";
 import PwaInstallPrompt from "./PwaInstallPrompt";
+import HeroCarousel from "./HeroCarousel";
 import {
   amenityGroups,
+  guestReviews,
   galleryImages,
   galleryLinks,
   galleryVideo,
+  heroImages,
   nearbyPlaces,
   propertyProfile,
+  reviewSummary,
   serviceContacts,
   stayDetails,
   unavailableAmenities,
@@ -22,8 +26,8 @@ export const dynamic = "force-dynamic";
 const quickFacts: ReadonlyArray<[IconName, string]> = [
   ["bed", "2 Bedrooms"],
   ["users", "Up to 6 guests"],
-  ["wifi", "31 Mbps Wi-Fi"],
-  ["tv", "2 TVs"],
+  ["bed", "5 Beds"],
+  ["shower", "2.5 Baths"],
 ];
 
 export default function Home() {
@@ -34,7 +38,6 @@ export default function Home() {
           <Image src="/images/rechel-s-place/logo.svg" alt="Rechel’s Place" width={42} height={42} />
           <span><strong>Rechel’s Place</strong><small>CDO condo stay</small></span>
         </a>
-        <nav className="pwa-header-nav" aria-label="Explore Rechel's Place"><a href="#spaces">The space</a><a href="#rooms">Sleeping</a><a href="#availability">Availability</a></nav>
         <span className="pwa-online"><i /> Online</span>
         <div className="pwa-head-actions">
           <BookingLauncher className="pwa-icon-book"><UiIcon name="calendar" size={16} /><span className="sr-only">View live availability</span></BookingLauncher>
@@ -45,29 +48,31 @@ export default function Home() {
       <PwaInstallPrompt />
       <div className="pwa-status"><span><i /> Online · Ready to book</span><span><UiIcon name="bolt" size={11} /> Live availability calendar</span></div>
 
-      <section className="pwa-hero">
-        <div className="pwa-hero-photo">
-          <Image src="/images/rechel-s-place/airbnb-living-room.jpg" alt="Rechel's Place living room with sofa, TV, and city view" fill priority sizes="(max-width: 700px) 100vw, 60vw" />
+      <section className="pwa-hero" aria-labelledby="hero-heading">
+        <div className="pwa-hero-copy">
           <Image className="pwa-botanical-corner" src="/images/rechel-s-place/botanical-corner.svg" alt="" aria-hidden="true" width={240} height={270} />
-          <div className="pwa-photo-caption"><span>RECHEL’S PLACE · CDO</span><strong>Room to settle in.</strong></div>
+          <div className="pwa-hero-meta"><span><UiIcon name="pin" size={13} /> {propertyProfile.locationLabel}</span><strong>Entire condo</strong></div>
+          <div className="pwa-hero-copy-main"><small>YOUR HOME AWAY FROM HOME</small><h1 id="hero-heading">A calm home base for your CDO days.</h1><p>{propertyProfile.tagline}</p></div>
+          <div className="pwa-hero-rate"><span>DIRECT BOOKING RATE</span><strong>₱4,500 <em>/ night</em></strong><small>50% down payment · ₱1,000 refundable deposit</small></div>
         </div>
-        <div className="pwa-hero-intro">
-          <div className="pwa-hero-top"><span><UiIcon name="pin" size={12} /> {propertyProfile.locationLabel}</span><strong>Entire condo</strong></div>
-          <div className="pwa-hero-copy"><small>YOUR CITY STAY, MADE SIMPLE</small><h1>Find your<br /><em>place in CDO.</em></h1><p>A comfortable two-bedroom home base for slow mornings, city plans, and everything in between.</p></div>
-          <div className="pwa-hero-rate"><span>THE WHOLE CONDO FROM</span><strong>₱4,500 <small>/ night</small></strong><span>6 guests · 2 bedrooms · 5 beds · 2.5 baths</span></div>
-        </div>
+        <HeroCarousel slides={heroImages} />
+        <div className="pwa-facts">{quickFacts.map(([icon, label]) => <div key={label}><span><UiIcon name={icon} size={19} /></span><strong>{label}</strong></div>)}</div>
       </section>
 
-      <div className="pwa-facts">{quickFacts.map(([icon, label]) => <div key={label}><span><UiIcon name={icon} size={22} /></span><strong>{label}</strong></div>)}</div>
       <div className="pwa-primary-actions"><BookingLauncher><UiIcon name="calendar" size={17} />Reserve your dates</BookingLauncher><a href={propertyProfile.messengerUrl} target="_blank" rel="noreferrer"><UiIcon name="message" size={17} />Chat host</a></div>
       <div className="pwa-source-links" aria-label="Official property links">
         <a href={propertyProfile.airbnbUrl} target="_blank" rel="noreferrer"><UiIcon name="image" size={15} />View listing on Airbnb ↗</a>
         <a href={propertyProfile.facebookUrl} target="_blank" rel="noreferrer"><UiIcon name="message" size={15} />Visit Facebook page ↗</a>
       </div>
+      <div className="pwa-trust-strip" aria-label="Reasons to stay at Rechel's Place">
+        <article><span><UiIcon name="check" size={16} /></span><div><strong>{propertyProfile.ratingLabel}</strong><small>{propertyProfile.reviewCount} Airbnb reviews</small></div></article>
+        <article><span><UiIcon name="home" size={16} /></span><div><strong>Entire condo</strong><small>Private two-bedroom stay</small></div></article>
+        <article><span><UiIcon name="message" size={16} /></span><div><strong>Direct owner support</strong><small>Ask Rechel about your dates</small></div></article>
+      </div>
 
       <section className="pwa-section" id="spaces">
-        <div className="pwa-section-title"><div><small>TAKE A LOOK AROUND</small><h2>At home in the city.</h2></div><span>01<small>THE SPACE</small></span></div>
-        <div className="pwa-gallery">{galleryImages.map((image, index) => <figure key={image.src} className={index === 0 ? "pwa-gallery-main" : ""}><Image src={image.src} alt={image.alt} fill sizes="(max-width: 720px) 70vw, 360px" /><figcaption>{String(index + 1).padStart(2, "0")}</figcaption></figure>)}</div>
+        <div className="pwa-section-title"><div><small>PHOTOS FROM THE LISTING</small><h2>Bright spaces for easy living.</h2></div><span>REAL<small>PHOTOS</small></span></div>
+        <div className="pwa-gallery">{galleryImages.map((image, index) => <figure key={image.src} className={index === 0 ? "pwa-gallery-main" : ""}><Image src={image.src} alt={image.alt} fill sizes="(max-width: 760px) 50vw, 32vw" quality={90} /></figure>)}</div>
         <div className="pwa-video-showcase">
           <div className="pwa-video-copy">
             <small>VIDEO TOUR</small>
@@ -92,15 +97,27 @@ export default function Home() {
       </section>
 
       <section className="pwa-rooms" id="rooms">
-        <div className="pwa-rooms-heading"><small>WHERE YOU’LL REST</small><h2>Space for everyone.</h2><p>Two bedrooms and flexible sleeping arrangements in one private condo. No separate rooms to book.</p></div>
-        <article><div className="pwa-room-photo"><Image src="/images/rechel-s-place/airbnb-bedroom-1.jpg" alt="Primary bedroom with a queen bed and city view" fill sizes="(max-width: 700px) 100vw, 50vw" /></div><div className="pwa-room-copy"><span>PRIMARY BEDROOM</span><strong className="pwa-room-price">Included</strong><small className="pwa-room-occupancy">1 queen bed · Part of the entire-condo stay</small><h3>Rest with a view</h3><p>A private bedroom with a queen bed, workspace, storage, and a city-facing view.</p><ul><li>Queen bed</li><li>Dedicated workspace</li><li>Clothing storage</li><li>TV</li></ul></div></article>
-        <article><div className="pwa-room-photo"><Image src="/images/rechel-s-place/airbnb-bedroom-2.jpg" alt="Second bedroom with a queen bed, desk, and city view" fill sizes="(max-width: 700px) 100vw, 50vw" /></div><div className="pwa-room-copy"><span>SECOND BEDROOM</span><strong className="pwa-room-price">Included</strong><small className="pwa-room-occupancy">Queen bed · Sofa bed · Bunk bed · Floor mattresses</small><h3>Flexible sleeping space</h3><p>Settle in with flexible sleeping arrangements for families and friends sharing the condo.</p><ul><li>Queen bed</li><li>Sofa bed and bunk bed</li><li>Two floor mattresses</li><li>Desk and TV</li></ul></div></article>
+        <div className="pwa-rooms-heading"><small>SLEEPING SPACES</small><h2>Two bedrooms.<br />One easy stay.</h2><p>The entire condo is available for your group, with five beds and room for up to six guests.</p></div>
+        <article><div className="pwa-room-photo"><Image src="/images/rechel-s-place/airbnb-bedroom-1.webp" alt="Primary bedroom with a queen bed and city view" fill sizes="(max-width: 700px) 100vw, 50vw" /></div><div className="pwa-room-copy"><span>PRIMARY BEDROOM</span><strong className="pwa-room-price">Included</strong><small className="pwa-room-occupancy">1 queen bed · Part of the entire-condo stay</small><h3>Rest with a view</h3><p>A private bedroom with a queen bed, workspace, storage, and a city-facing view.</p><ul><li>Queen bed</li><li>Dedicated workspace</li><li>Clothing storage</li><li>TV</li></ul></div></article>
+        <article><div className="pwa-room-photo"><Image src="/images/rechel-s-place/airbnb-bedroom-2.webp" alt="Second bedroom with a queen bed, desk, and city view" fill sizes="(max-width: 700px) 100vw, 50vw" /></div><div className="pwa-room-copy"><span>SECOND BEDROOM</span><strong className="pwa-room-price">Included</strong><small className="pwa-room-occupancy">Queen bed · Sofa bed · Bunk bed · Floor mattresses</small><h3>Flexible sleeping space</h3><p>Settle in with flexible sleeping arrangements for families and friends sharing the condo.</p><ul><li>Queen bed</li><li>Sofa bed and bunk bed</li><li>Two floor mattresses</li><li>Desk and TV</li></ul></div></article>
       </section>
 
       <section className="pwa-section pwa-amenities" id="amenities">
         <small>WHAT THIS PLACE OFFERS</small><h2>Stay essentials,<br />already handled.</h2>
         <div className="pwa-amenity-groups">{amenityGroups.map(group => <article className="pwa-amenity-group" key={group.title}><header><span><UiIcon name={group.icon as IconName} size={19} /></span><h3>{group.title}</h3></header><ul>{group.items.map(item => <li key={item.name}><UiIcon name="check" size={15} /><div><strong>{item.name}</strong>{"detail" in item && item.detail ? <small>{item.detail}</small> : null}</div></li>)}</ul></article>)}</div>
-        <article className="pwa-unavailable"><header><span aria-hidden="true">×</span><div><small>NOT INCLUDED</small><h3>Unavailable at this property</h3></div></header><ul>{unavailableAmenities.map(item => <li key={item}><span aria-hidden="true">×</span><div><strong>{item}</strong><small>Airbnb does not report a carbon monoxide alarm for this listing.</small></div></li>)}</ul></article>
+        <article className="pwa-unavailable"><header><span aria-hidden="true">×</span><div><small>NOT INCLUDED</small><h3>Unavailable at this property</h3></div></header><ul>{unavailableAmenities.map(item => <li key={item.name}><span aria-hidden="true">×</span><div><strong>{item.name}</strong><small>{item.detail}</small></div></li>)}</ul></article>
+      </section>
+
+      <section className="pwa-reviews" id="reviews" aria-labelledby="reviews-heading">
+        <div className="pwa-reviews-heading"><div><small>GUEST REVIEWS</small><h2 id="reviews-heading">A stay guests come back to.</h2><p>{reviewSummary.ratingLabel}</p></div><a className="pwa-reviews-link" href={propertyProfile.airbnbUrl} target="_blank" rel="noreferrer">Show all {propertyProfile.reviewCount} reviews <UiIcon name="arrow-right" size={15} /></a></div>
+        <div className="pwa-review-overview">
+          <article className="pwa-review-score"><span className="pwa-review-eyebrow">OVERALL RATING</span><div className="pwa-review-score-value"><strong>{reviewSummary.rating}</strong><span>/ 5</span></div><p>{propertyProfile.reviewCount} Airbnb reviews</p><small>7 of 7 rating areas shown</small></article>
+          <article className="pwa-review-favorite"><div className="pwa-review-favorite-mark"><UiIcon name="bookmark" size={18} /><span>{reviewSummary.guestFavoriteTitle}</span></div><h3>Top 10% of homes</h3><p>{reviewSummary.guestFavoriteCopy}</p><a href={propertyProfile.airbnbUrl} target="_blank" rel="noreferrer">Learn more ↗</a></article>
+          <article className="pwa-review-distribution"><span className="pwa-review-eyebrow">RATING BREAKDOWN</span><div className="pwa-review-bars">{reviewSummary.ratingDistribution.map(row => <div className="pwa-review-bar" key={row.label} aria-label={`${row.label}: ${row.percentage}% of reviews`}><span>{row.label.replace(" stars", "").replace(" star", "")}</span><div className="pwa-review-bar-track" aria-hidden="true"><span style={{ width: `${row.percentage}%` }} /></div><b>{row.percentage}%</b></div>)}</div></article>
+        </div>
+        <div className="pwa-review-category-grid" aria-label="Category ratings">{reviewSummary.categoryRatings.map(category => <article key={category.label}><span>{category.label}</span><strong>{category.score}</strong></article>)}</div>
+        <div className="pwa-review-topics"><div className="pwa-review-section-label"><span>GUEST REVIEWS MENTION</span><small>Topics guests bring up most often</small></div><div className="pwa-review-topic-list">{reviewSummary.mentionedTopics.map(topic => <span key={topic.label}><strong>{topic.label}</strong><b>{topic.count}</b></span>)}</div></div>
+        <div className="pwa-review-cards">{guestReviews.map(review => <article className="pwa-review-card" key={`${review.author}-${review.date}`}><header><span className="pwa-review-avatar" aria-hidden="true">{review.author.slice(0, 1)}</span><div><strong>{review.author}</strong><small>{review.tenure}</small></div><span className="pwa-review-rating" aria-label="5 out of 5 rating">5.0</span></header><blockquote><p>{review.quote}</p></blockquote><footer><span>{review.context}</span><span>{review.date}</span></footer></article>)}</div>
       </section>
 
       <section className="pwa-section pwa-stay-details" id="stay-details">
@@ -110,12 +127,19 @@ export default function Home() {
 
       <section className="pwa-location" id="location">
         <div><small>YOUR CDO HOME BASE</small><h2>Close to the city.<br />Cozy when you&apos;re home.</h2><address>{propertyProfile.address}</address><ul>{nearbyPlaces.map(place => <li key={place}>{place}</li>)}</ul><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(propertyProfile.address)}`} target="_blank" rel="noreferrer">Open in Google Maps ↗</a></div>
-        <Image src="/images/rechel-s-place/airbnb-kitchen-dining.jpg" alt="Open-plan kitchen, dining, and living area" width={520} height={640} />
+        <Image src="/images/rechel-s-place/airbnb-kitchen-dining.webp" alt="Open-plan kitchen, dining, and living area" width={520} height={640} />
       </section>
 
       <section className="pwa-booking" id="availability" tabIndex={-1} aria-labelledby="availability-heading">
         <div className="pwa-book-heading"><span>LIVE AVAILABILITY · DIRECT WITH HOST</span><h2 id="availability-heading">Reserve your stay.</h2><p>Choose your preferred dates and contact Rechel directly. The current accommodation rate is ₱4,500 per night; a 50% down payment secures the stay, and the separate ₱1,000 refundable security deposit is due upon check-in on that day.</p></div>
-        <div className="pwa-availability-layout"><aside className="pwa-book-side"><div className="pwa-config-card"><span>YOUR STAY</span><article><div><strong>{propertyProfile.descriptor}</strong><small>{propertyProfile.maxGuests} guests · 2 bedrooms · {propertyProfile.bedLabel} · {propertyProfile.bathroomLabel} · Kitchen · Pool · Keypad</small></div><b>₱4,500/night</b></article><article><div><strong>Top guest favorite</strong><small>{propertyProfile.ratingLabel} from {propertyProfile.reviewCount} Airbnb reviews</small></div><b>Airbnb</b></article></div><div className="pwa-returning"><strong>Already sent a request?</strong><SavedBookingLink /></div></aside><AvailabilityCalendar /></div>
+        <div className="pwa-config-card"><span>STAY CONFIGURATION</span><article><div><strong>{propertyProfile.descriptor}</strong><small>{propertyProfile.maxGuests} guests · 2 bedrooms · {propertyProfile.bedLabel} · {propertyProfile.bathroomLabel} · Kitchen · Pool · Keypad</small></div><b>₱4,500/night</b></article><article><div><strong>Top guest favorite</strong><small>{propertyProfile.ratingLabel} from {propertyProfile.reviewCount} Airbnb reviews</small></div><b>Airbnb</b></article></div>
+        <div className="pwa-booking-policy" aria-label="Booking payment terms">
+          <article><b>₱4,500</b><span>nightly rate</span></article>
+          <article><b>50%</b><span>down payment</span></article>
+          <article><b>₱1,000</b><span>refundable security deposit on check-in</span></article>
+        </div>
+        <AvailabilityCalendar />
+        <div className="pwa-returning"><strong>Already sent a request?</strong><SavedBookingLink /></div>
       </section>
 
       <section className="pwa-host"><Image src="/images/rechel-s-place/logo.svg" alt="Rechel’s Place logo" width={110} height={110} /><div><small>DIRECT OWNER ASSISTANCE</small><h2>Questions before booking?</h2><p>Talk directly with Rechel about availability, current pricing, policies, and anything you need for a comfortable CDO stay.</p><div className="pwa-host-links"><a href={propertyProfile.messengerUrl} target="_blank" rel="noreferrer">Chat on Facebook →</a><a href={propertyProfile.airbnbUrl} target="_blank" rel="noreferrer">View Airbnb listing →</a></div></div></section>

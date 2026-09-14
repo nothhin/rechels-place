@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./booking": "./src/booking.ts"
+    "./booking": "./src/booking.ts",
+    "./booking-lifecycle": "./src/booking-lifecycle.ts"
   },
   "scripts": {
     "check": "tsc --noEmit",

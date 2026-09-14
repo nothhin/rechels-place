@@ -349,7 +349,7 @@ export default function BookingModal({
                 <div className="booking-preview-photos">
                   <figure>
                     <Image
-                      src="/images/rechel-s-place/airbnb-bedroom-1.jpg"
+                      src="/images/rechel-s-place/airbnb-bedroom-1.webp"
                       alt="Primary bedroom with a queen bed and city view"
                       fill
                       sizes="220px"
@@ -358,7 +358,7 @@ export default function BookingModal({
                   </figure>
                   <figure>
                     <Image
-                      src="/images/rechel-s-place/airbnb-living-room.jpg"
+                      src="/images/rechel-s-place/airbnb-living-room.webp"
                       alt="Living room with sofa, TV, and city view"
                       fill
                       sizes="220px"

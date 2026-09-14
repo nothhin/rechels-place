@@ -7,6 +7,7 @@ import {
   normalizeGuestEmail,
   reservationRequestSchema,
   bookingEnquirySchema,
+  rechelsPlacePricingStrategy,
   stayNights,
 } from "./booking";
 
@@ -96,6 +97,33 @@ describe("money calculations", () => {
 
   it("defaults new pricing requests to the whole-condo rate", () => {
     expect(calculateSnowazNightlyRateMinor(2)).toBe(450_000);
+  });
+
+  it("allows a different property strategy to reuse the receipt workflow", () => {
+    const strategy = {
+      ...rechelsPlacePricingStrategy,
+      nightlyRateMinor: () => 600_000,
+      baseNightlyRateMinor: () => 600_000,
+      additionalGuestChargeMinor: () => 0,
+      parkingNightlyRateMinor: () => 0,
+      timeExtensionFeeMinor: () => 0,
+      downPaymentPercent: 30,
+      refundableSecurityDepositMinor: 200_000,
+    };
+    const receipt = calculateSnowazBookingReceipt(
+      "2026-09-01",
+      "2026-09-03",
+      2,
+      "none",
+      "both_bedrooms",
+      0,
+      0,
+      strategy,
+    );
+
+    expect(receipt.totalMinor).toBe(1_200_000);
+    expect(receipt.downPaymentMinor).toBe(360_000);
+    expect(receipt.refundableSecurityDepositMinor).toBe(200_000);
   });
 
   it("builds a receipt with a 50% down payment and separate security deposit", () => {

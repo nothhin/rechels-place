@@ -1,13 +1,10 @@
 import "server-only";
 
 import { createClient } from "@supabase/supabase-js";
-import {
-  parseAirbnbCalendar,
-} from "./airbnb-calendar-parser";
 import { normalizeAirbnbIcalUrl } from "./airbnb-calendar-url";
+import { airbnbCalendarAdapter } from "./airbnb-calendar-adapter";
 export { isAirbnbExportTokenValid, parseAirbnbCalendar } from "./airbnb-calendar-parser";
 
-const MAX_ICAL_BYTES = 1_000_000;
 const SYNC_STALE_AFTER_MS = 15 * 60 * 1_000;
 
 export type AirbnbSyncResult = {
@@ -183,25 +180,6 @@ export async function buildWebsiteIcalFeed() {
   return `${lines.join("\r\n")}\r\n`;
 }
 
-async function fetchAirbnbCalendar(url: string) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
-  try {
-    const response = await fetch(url, {
-      cache: "no-store",
-      headers: { Accept: "text/calendar,text/plain;q=0.9,*/*;q=0.1", "User-Agent": "Rechels-Place-Calendar-Sync/1.0" },
-      signal: controller.signal,
-    });
-    if (!response.ok) throw new Error(`Airbnb calendar returned HTTP ${response.status}.`);
-    const contentLength = Number(response.headers.get("content-length") ?? "0");
-    if (contentLength > MAX_ICAL_BYTES) throw new Error("Airbnb calendar feed is too large.");
-    const body = await response.text();
-    return parseAirbnbCalendar(body);
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
 async function updateSyncState(values: Record<string, unknown>) {
   const admin = createSupabaseAdminClient();
   if (!admin) return;
@@ -221,7 +199,7 @@ export async function syncAirbnbCalendar(): Promise<AirbnbSyncResult> {
   await updateSyncState({ status: "running", last_started_at: startedAt, last_error: null, updated_at: startedAt });
 
   try {
-    const events = await fetchAirbnbCalendar(importUrl);
+    const events = await airbnbCalendarAdapter.fetchEvents(importUrl);
     // An empty response can be transient. Never clear known Airbnb holds from
     // a feed that contains no events; that could expose reserved dates.
     if (events.length === 0) {

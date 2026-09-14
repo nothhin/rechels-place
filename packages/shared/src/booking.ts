@@ -83,6 +83,35 @@ export const bookingEnquirySchema = staySchema.extend({
     website: z.string().max(0).optional().or(z.literal("")),
   });
 
+export type BedroomChoice = z.infer<typeof bedroomChoiceSchema>;
+export type ParkingType = z.infer<typeof parkingTypeSchema>;
+
+export type AdditionalGuestChargeInput = {
+  guests: number;
+  bedroomChoice: BedroomChoice;
+  nightlyRateMinor: number;
+  nights: number;
+};
+
+/**
+ * Strategy boundary for stay pricing. A future property can provide its own
+ * rates and payment policy without changing the booking receipt workflow.
+ */
+export type StayPricingStrategy = {
+  nightlyRateMinor: (guests: number, bedroomChoice: BedroomChoice) => number;
+  baseNightlyRateMinor: (bedroomChoice: BedroomChoice) => number;
+  additionalGuestChargeMinor: (input: AdditionalGuestChargeInput) => number;
+  parkingNightlyRateMinor: (parkingType: ParkingType) => number;
+  timeExtensionFeeMinor: (hours: number) => number;
+  downPaymentPercent: number;
+  refundableSecurityDepositMinor: number;
+};
+
+const LEGACY_SINGLE_BEDROOM_BASE_RATE_MINOR = 170_000;
+const CAR_PARKING_NIGHTLY_RATE_MINOR = 35_000;
+const MOTORCYCLE_PARKING_NIGHTLY_RATE_MINOR = 15_000;
+const TIME_EXTENSION_PER_HOUR_MINOR = 15_000;
+
 export function stayNights(checkIn: string, checkOut: string) {
   const parsed = staySchema.parse({ checkIn, checkOut });
   const start = Date.parse(`${parsed.checkIn}T00:00:00.000Z`);
@@ -111,14 +140,17 @@ export function calculateStayTotalMinor(
   return total;
 }
 
-export function calculateSnowazNightlyRateMinor(
-  guests: number,
-  bedroomChoice: "bedroom_1" | "bedroom_2" | "both_bedrooms" = "both_bedrooms",
-) {
+function validateGuestCount(guests: number) {
   if (!Number.isSafeInteger(guests) || guests < 1 || guests > 6) {
     throw new RangeError("Guest count must be a whole number from 1 to 6.");
   }
+}
 
+function calculateRechelsPlaceNightlyRateMinor(
+  guests: number,
+  bedroomChoice: BedroomChoice = "both_bedrooms",
+) {
+  validateGuestCount(guests);
   if (bedroomChoice === "bedroom_1") return 170_000;
   if (bedroomChoice === "bedroom_2") {
     if (guests <= 2) return 170_000;
@@ -126,6 +158,35 @@ export function calculateSnowazNightlyRateMinor(
     return 210_000 + Math.max(0, guests - 4) * 25_000;
   }
   return RECHELS_PLACE_NIGHTLY_RATE_MINOR;
+}
+
+export const rechelsPlacePricingStrategy: StayPricingStrategy = {
+  nightlyRateMinor: calculateRechelsPlaceNightlyRateMinor,
+  baseNightlyRateMinor: (bedroomChoice) =>
+    bedroomChoice === "both_bedrooms"
+      ? RECHELS_PLACE_NIGHTLY_RATE_MINOR
+      : LEGACY_SINGLE_BEDROOM_BASE_RATE_MINOR,
+  additionalGuestChargeMinor: ({ bedroomChoice, nightlyRateMinor, nights }) =>
+    bedroomChoice === "bedroom_2"
+      ? Math.max(0, nightlyRateMinor - LEGACY_SINGLE_BEDROOM_BASE_RATE_MINOR) * nights
+      : 0,
+  parkingNightlyRateMinor: (parkingType) =>
+    parkingType === "car"
+      ? CAR_PARKING_NIGHTLY_RATE_MINOR
+      : parkingType === "motorcycle"
+        ? MOTORCYCLE_PARKING_NIGHTLY_RATE_MINOR
+        : 0,
+  timeExtensionFeeMinor: (hours) => hours * TIME_EXTENSION_PER_HOUR_MINOR,
+  downPaymentPercent: RECHELS_PLACE_DOWN_PAYMENT_PERCENT,
+  refundableSecurityDepositMinor: RECHELS_PLACE_REFUNDABLE_SECURITY_DEPOSIT_MINOR,
+};
+
+/** Compatibility wrapper for existing Rechel's Place callers. */
+export function calculateSnowazNightlyRateMinor(
+  guests: number,
+  bedroomChoice: BedroomChoice = "both_bedrooms",
+) {
+  return rechelsPlacePricingStrategy.nightlyRateMinor(guests, bedroomChoice);
 }
 
 export function automaticBedroomChoice(guests: number) {
@@ -140,32 +201,37 @@ export function calculateSnowazBookingReceipt(
   checkIn: string,
   checkOut: string,
   guests: number,
-  parkingType: "none" | "car" | "motorcycle" = "none",
-  bedroomChoice: "bedroom_1" | "bedroom_2" | "both_bedrooms" = "both_bedrooms",
+  parkingType: ParkingType = "none",
+  bedroomChoice: BedroomChoice = "both_bedrooms",
   earlyCheckInHours = 0,
   lateCheckoutHours = 0,
+  pricingStrategy: StayPricingStrategy = rechelsPlacePricingStrategy,
 ) {
   if (!Number.isSafeInteger(earlyCheckInHours) || earlyCheckInHours < 0 || earlyCheckInHours > 5)
     throw new RangeError("Early check-in must be a whole number from 0 to 5 hours.");
   if (!Number.isSafeInteger(lateCheckoutHours) || lateCheckoutHours < 0 || lateCheckoutHours > 5)
     throw new RangeError("Late checkout must be a whole number from 0 to 5 hours.");
   const nights = stayNights(checkIn, checkOut);
-  const nightlyRateMinor = calculateSnowazNightlyRateMinor(guests, bedroomChoice);
-  const baseNightlyRateMinor = bedroomChoice === "both_bedrooms" ? RECHELS_PLACE_NIGHTLY_RATE_MINOR : 170_000;
-  const parkingNightlyRateMinor =
-    parkingType === "car" ? 35_000 : parkingType === "motorcycle" ? 15_000 : 0;
+  const nightlyRateMinor = pricingStrategy.nightlyRateMinor(guests, bedroomChoice);
+  const baseNightlyRateMinor = pricingStrategy.baseNightlyRateMinor(bedroomChoice);
+  const parkingNightlyRateMinor = pricingStrategy.parkingNightlyRateMinor(parkingType);
   const parkingChargeMinor = parkingNightlyRateMinor * nights;
-  const earlyCheckInFeeMinor = earlyCheckInHours * 15_000;
-  const lateCheckoutFeeMinor = lateCheckoutHours * 15_000;
+  const earlyCheckInFeeMinor = pricingStrategy.timeExtensionFeeMinor(earlyCheckInHours);
+  const lateCheckoutFeeMinor = pricingStrategy.timeExtensionFeeMinor(lateCheckoutHours);
   const timeExtensionChargeMinor = earlyCheckInFeeMinor + lateCheckoutFeeMinor;
   const additionalGuests = bedroomChoice === "both_bedrooms" ? 0 : Math.max(0, guests - 2);
-  const additionalGuestChargeMinor = bedroomChoice === "bedroom_2" ? Math.max(0, nightlyRateMinor - 170_000) * nights : 0;
+  const additionalGuestChargeMinor = pricingStrategy.additionalGuestChargeMinor({
+    guests,
+    bedroomChoice,
+    nightlyRateMinor,
+    nights,
+  });
   const accommodationSubtotalMinor =
     calculateStayTotalMinor(baseNightlyRateMinor, nights) + additionalGuestChargeMinor;
   const extrasTotalMinor = parkingChargeMinor + timeExtensionChargeMinor;
   const totalMinor = accommodationSubtotalMinor + extrasTotalMinor;
   const downPaymentMinor = Math.ceil(
-    (totalMinor * RECHELS_PLACE_DOWN_PAYMENT_PERCENT) / 100,
+    (totalMinor * pricingStrategy.downPaymentPercent) / 100,
   );
   const earlyCheckInTime = earlyCheckInHours
     ? `${String(14 - earlyCheckInHours).padStart(2, "0")}:00`
@@ -196,7 +262,7 @@ export function calculateSnowazBookingReceipt(
     extrasTotalMinor,
     totalMinor,
     downPaymentMinor,
-    refundableSecurityDepositMinor: RECHELS_PLACE_REFUNDABLE_SECURITY_DEPOSIT_MINOR,
+    refundableSecurityDepositMinor: pricingStrategy.refundableSecurityDepositMinor,
     remainingBalanceMinor: totalMinor - downPaymentMinor,
   } as const;
 }

@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { bookingRequestStatusSchema, transitionBookingRequestStatus } from "@uppadar-hollie/shared/booking-lifecycle";
 import { requireStaff } from "@/lib/server/admin-auth";
 import { parseDatabaseEnvironment } from "@/lib/server/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -323,13 +324,23 @@ export async function updateBookingRequestStatus(
     .object({
       bookingId: z.string().uuid(),
       status: z.enum(["declined", "cancelled"]),
+      currentStatus: bookingRequestStatusSchema,
     })
     .safeParse({
       bookingId: formData.get("bookingId"),
       status: formData.get("status"),
+      currentStatus: formData.get("currentStatus"),
     });
   if (!parsed.success)
     return { status: "error", message: "Invalid booking status change." };
+  try {
+    transitionBookingRequestStatus(parsed.data.currentStatus, parsed.data.status);
+  } catch {
+    return {
+      status: "error",
+      message: "This booking can no longer be changed to that status.",
+    };
+  }
   const supabase = await createSupabaseServerClient();
   const { data: updated, error } = await supabase.rpc(
     "staff_update_snowaz_booking_status",
