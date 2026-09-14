@@ -236,8 +236,17 @@
     padding: 15px 14px;
     gap: 10px;
   }
-  .card :global(.booking-receipt > header strong) { font-size: 19px; }
-  .card :global(.booking-receipt > header span) { flex: none; font-size: 8px; }
+  .card :global(.booking-receipt > header .booking-receipt-brand) {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .card :global(.booking-receipt > header strong) {
+    min-width: 0;
+    font-size: 19px;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+  .card :global(.booking-receipt > header > span) { flex: none; font-size: 8px; }
   .card :global(.booking-receipt dl) { padding: 10px 14px; }
   .card :global(.booking-receipt dl div) {
     align-items: flex-start;

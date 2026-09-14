@@ -23,11 +23,14 @@ export default function GuestMenu() {
   }, [open]);
 
   if (pathname.startsWith("/admin")) return null;
+  const menuClassName = pathname.startsWith("/deposit/")
+    ? "guest-menu-toggle guest-menu-toggle-flow"
+    : "guest-menu-toggle";
   const cancellationUrl = bookingUrl ? `${bookingUrl}#cancellation-help` : "/booking-status";
   const close = () => setOpen(false);
 
   return <>
-    <button className="guest-menu-toggle" type="button" aria-label="Open guest menu" aria-expanded={open} aria-controls={drawerId} onClick={() => setOpen(true)}><span /><span /><span /></button>
+    <button className={menuClassName} type="button" aria-label="Open guest menu" aria-expanded={open} aria-controls={drawerId} onClick={() => setOpen(true)}><span /><span /><span /></button>
     {open ? <div className="guest-menu-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
       <aside className="guest-menu-drawer" id={drawerId} aria-label="Guest menu">
         <header><div className="guest-menu-brand"><Image src={propertyLogoSrc} alt="" width={52} height={52} /><span><small>Guest services</small><strong>Rechel’s Place</strong></span></div><button type="button" aria-label="Close guest menu" onClick={close}>×</button></header>

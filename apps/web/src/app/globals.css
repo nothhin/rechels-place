@@ -510,6 +510,8 @@ h3 {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 .booking-receipt-brand img {
   flex: 0 0 auto;
@@ -520,6 +522,7 @@ h3 {
 .booking-receipt-brand > span {
   display: grid;
   gap: 3px;
+  min-width: 0;
 }
 .booking-receipt > header small {
   color: #8a6546;
@@ -532,7 +535,7 @@ h3 {
   font-family: var(--font-display), serif;
   font-size: 22px;
 }
-.booking-receipt > header span {
+.booking-receipt > header > span {
   padding: 6px 10px;
   border-radius: 999px;
   background: #40362f;
@@ -607,6 +610,24 @@ h3 {
 }
 .booking-receipt-empty p {
   padding: 8px 0 0;
+}
+@media (max-width: 560px) {
+  .booking-receipt > header {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 15px 14px;
+  }
+  .booking-receipt > header strong {
+    font-size: 19px;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+  .booking-receipt > header > span {
+    flex: 0 0 auto;
+    padding: 5px 8px;
+    font-size: 8px;
+    white-space: nowrap;
+  }
 }
 
 .availability-section {
@@ -1815,6 +1836,9 @@ h3 {
   box-shadow: 0 12px 35px rgba(35, 27, 21, 0.22);
   cursor: pointer;
   backdrop-filter: blur(12px);
+}
+.guest-menu-toggle-flow {
+  position: absolute;
 }
 .guest-menu-toggle span {
   display: block;
