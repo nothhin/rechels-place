@@ -186,9 +186,9 @@ export default function BookingModal({
             <h2 id={titleId}>Thank you. We&apos;ll be in touch.</h2>
             <p>
               Your reference is <strong>{state.bookingReference}</strong>. Your
-              stay is not confirmed yet; the host will contact you with
-              availability, the final rate, current rules, and payment
-              instructions.
+              stay is not confirmed yet. Review the private payment page for
+              the 50% down payment; the ₱1,000 refundable security deposit is
+              due separately upon check-in on that day.
             </p>
             <a
               className="booking-deposit-link"
@@ -215,7 +215,8 @@ export default function BookingModal({
                   <h2 id={titleId} ref={stepHeadingRef} tabIndex={-1}>Reserve Your Sanctuary</h2>
                   <p>
                     Choose your preferred dates and send your stay details. The
-                    host will confirm the final rate directly with you.
+                    current accommodation rate is ₱4,500 per night, subject to
+                    the host confirming availability.
                   </p>
                 </div>
                 <div className="booking-selected-dates" role="status">
@@ -266,7 +267,7 @@ export default function BookingModal({
                         <strong>Entire two-bedroom condo</strong>
                         <small>2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests</small>
                       </span>
-                      <b>Ask host</b>
+                      <b>₱4,500/night</b>
                     </div>
                   </div>
                 </section>
@@ -419,11 +420,12 @@ export default function BookingModal({
                   <div className="booking-rate-note">
                     <UiIcon name="check" size={18} />
                     <div>
-                      <strong>Rate confirmed by host</strong>
+                      <strong>Current rate: ₱4,500/night</strong>
                       <small>
-                        No payment is collected in this form. Current rates,
-                        policies, and payment instructions are sent after
-                        review.
+                        No payment is collected in this form. A 50% down
+                        payment secures the accommodation balance, while the
+                        separate ₱1,000 refundable security deposit is due upon
+                        check-in on that day.
                       </small>
                     </div>
                   </div>

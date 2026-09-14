@@ -85,8 +85,8 @@ export default function Home() {
       </section>
 
       <section className="pwa-booking" id="availability" tabIndex={-1} aria-labelledby="availability-heading">
-        <div className="pwa-book-heading"><span>LIVE AVAILABILITY · DIRECT WITH HOST</span><h2>Reserve your stay.</h2><p>Choose your preferred dates and contact Rechel directly. Airbnb shows a current reference price, while final availability and rate are confirmed by the host.</p></div>
-        <div className="pwa-config-card"><span>STAY CONFIGURATION</span><article><div><strong>Entire two-bedroom condo</strong><small>6 guests · 5 beds · 2.5 baths · Kitchen · Pool · Keypad</small></div><b>Ask host</b></article><article><div><strong>Top guest favorite</strong><small>{propertyProfile.ratingLabel} from {propertyProfile.reviewCount} Airbnb reviews</small></div><b>Airbnb</b></article></div>
+        <div className="pwa-book-heading"><span>LIVE AVAILABILITY · DIRECT WITH HOST</span><h2>Reserve your stay.</h2><p>Choose your preferred dates and contact Rechel directly. The current accommodation rate is ₱4,500 per night; a 50% down payment secures the stay, and the separate ₱1,000 refundable security deposit is due upon check-in on that day.</p></div>
+        <div className="pwa-config-card"><span>STAY CONFIGURATION</span><article><div><strong>Entire two-bedroom condo</strong><small>6 guests · 5 beds · 2.5 baths · Kitchen · Pool · Keypad</small></div><b>₱4,500/night</b></article><article><div><strong>Top guest favorite</strong><small>{propertyProfile.ratingLabel} from {propertyProfile.reviewCount} Airbnb reviews</small></div><b>Airbnb</b></article></div>
         <AvailabilityCalendar />
         <div className="pwa-returning"><strong>Already sent a request?</strong><SavedBookingLink /></div>
       </section>

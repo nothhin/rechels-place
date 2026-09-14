@@ -104,7 +104,7 @@ The admin calendar follows Stitch node `6fa982f15d314d309de8cc5e90dd7077`: month
 
 ## Content rule
 
-The design and interaction hierarchy mirror the Stitch nodes. SnowAZ business data in the source mockup is reference content only. Rechel's Place names, images, room details, contact, address, pricing, occupancy, policies, and payment terms must come only from confirmed Rechel's Place data. Unconfirmed prices display **Ask host** rather than copied SnowAZ rates.
+The design and interaction hierarchy mirror the Stitch nodes. SnowAZ business data in the source mockup is reference content only. Rechel's Place names, images, room details, contact, address, pricing, occupancy, policies, and payment terms must come only from confirmed Rechel's Place data. The currently confirmed rate and payment rules are ₱4,500/night, a 50% down payment, and a separate ₱1,000 refundable security deposit due upon check-in; any still-unconfirmed price must display **Ask host** rather than copied SnowAZ rates.
 
 ## Accessibility
 

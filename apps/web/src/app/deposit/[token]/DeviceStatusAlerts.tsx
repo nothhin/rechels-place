@@ -7,8 +7,8 @@ const statusKey = "snowaz:last-deposit-status:v1";
 
 function describeStatus(status: string) {
   if (status === "verified") return "Your down payment is verified and your stay is confirmed.";
-  if (status === "refund_pending") return "Your cancellation is recorded and your refund is being processed.";
-  if (status === "refunded") return "Your refund has been recorded.";
+  if (status === "refund_pending") return "Your cancellation is recorded and any applicable payment refund is being processed.";
+  if (status === "refunded") return "Your payment refund has been recorded.";
   if (status === "submitted") return "Rechel's Place received your payment details and is verifying them.";
   return "Your private booking status has changed.";
 }

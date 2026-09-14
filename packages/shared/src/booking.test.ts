@@ -88,28 +88,28 @@ describe("booking enquiries", () => {
 });
 
 describe("money calculations", () => {
-  it("uses the current whole-condo Airbnb reference rate", () => {
-    expect(calculateSnowazNightlyRateMinor(2, "both_bedrooms")).toBe(480_000);
-    expect(calculateSnowazNightlyRateMinor(6, "both_bedrooms")).toBe(480_000);
+  it("uses the current whole-condo nightly rate", () => {
+    expect(calculateSnowazNightlyRateMinor(2, "both_bedrooms")).toBe(450_000);
+    expect(calculateSnowazNightlyRateMinor(6, "both_bedrooms")).toBe(450_000);
     expect(() => calculateSnowazNightlyRateMinor(7)).toThrow(RangeError);
   });
 
   it("defaults new pricing requests to the whole-condo rate", () => {
-    expect(calculateSnowazNightlyRateMinor(2)).toBe(480_000);
+    expect(calculateSnowazNightlyRateMinor(2)).toBe(450_000);
   });
 
-  it("builds a receipt with a host-confirmed deposit and remaining balance", () => {
+  it("builds a receipt with a 50% down payment and separate security deposit", () => {
     expect(
       calculateSnowazBookingReceipt("2026-09-01", "2026-09-04", 5, "none", "both_bedrooms"),
     ).toEqual({
       nights: 3,
       guests: 5,
       bedrooms: 2,
-      baseNightlyRateMinor: 480_000,
-      nightlyRateMinor: 480_000,
+      baseNightlyRateMinor: 450_000,
+      nightlyRateMinor: 450_000,
       additionalGuests: 0,
       additionalGuestChargeMinor: 0,
-      accommodationSubtotalMinor: 1_440_000,
+      accommodationSubtotalMinor: 1_350_000,
       parkingType: "none",
       parkingNightlyRateMinor: 0,
       parkingChargeMinor: 0,
@@ -121,10 +121,24 @@ describe("money calculations", () => {
       lateCheckoutFeeMinor: 0,
       timeExtensionChargeMinor: 0,
       extrasTotalMinor: 0,
-      totalMinor: 1_440_000,
-      downPaymentMinor: null,
-      remainingBalanceMinor: 1_440_000,
+      totalMinor: 1_350_000,
+      downPaymentMinor: 675_000,
+      refundableSecurityDepositMinor: 100_000,
+      remainingBalanceMinor: 675_000,
     });
+  });
+  it("keeps the refundable security deposit out of the accommodation balance", () => {
+    const receipt = calculateSnowazBookingReceipt(
+      "2026-09-01",
+      "2026-09-02",
+      2,
+      "none",
+      "both_bedrooms",
+    );
+    expect(receipt.totalMinor).toBe(450_000);
+    expect(receipt.downPaymentMinor).toBe(225_000);
+    expect(receipt.remainingBalanceMinor).toBe(225_000);
+    expect(receipt.refundableSecurityDepositMinor).toBe(100_000);
   });
   it("adds optional parking per night", () => {
     expect(calculateSnowazBookingReceipt("2026-09-01", "2026-09-03", 2, "car").parkingChargeMinor).toBe(70_000);

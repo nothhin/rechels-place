@@ -1,6 +1,9 @@
 "use client";
 
-import { calculateSnowazBookingReceipt } from "@uppadar-hollie/shared/booking";
+import {
+  calculateSnowazBookingReceipt,
+  RECHELS_PLACE_REFUNDABLE_SECURITY_DEPOSIT_MINOR,
+} from "@uppadar-hollie/shared/booking";
 
 const php = new Intl.NumberFormat("en-PH", {
   style: "currency",
@@ -22,6 +25,8 @@ type BookingPriceReceiptProps = {
   customerPhone?: string;
   bookingStatus?: string;
   paymentStatus?: string;
+  downPaymentMinor?: number;
+  refundableSecurityDepositMinor?: number;
 };
 
 const bedroomLabels = {
@@ -44,6 +49,8 @@ export default function BookingPriceReceipt({
   customerPhone,
   bookingStatus,
   paymentStatus,
+  downPaymentMinor,
+  refundableSecurityDepositMinor,
 }: BookingPriceReceiptProps) {
   let receipt: ReturnType<typeof calculateSnowazBookingReceipt> | null = null;
   try {
@@ -112,7 +119,7 @@ export default function BookingPriceReceipt({
         </div>
         <div><dt>Space description</dt><dd>{bedroomChoice === "both_bedrooms" ? "2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests" : "Legacy bedroom selection"}</dd></div>
         <div>
-          <dt>Reference nightly rate</dt>
+          <dt>Nightly rate</dt>
           <dd>{php.format(receipt.baseNightlyRateMinor / 100)}</dd>
         </div>
         {receipt.additionalGuests > 0 ? (
@@ -150,20 +157,29 @@ export default function BookingPriceReceipt({
           <dd>{php.format(receipt.totalMinor / 100)}</dd>
         </div>
         <div className="booking-receipt-down">
-          <dt>Security deposit</dt>
-          <dd>Host confirms</dd>
+          <dt>50% down payment</dt>
+          <dd>{php.format((downPaymentMinor ?? receipt.downPaymentMinor) / 100)}</dd>
         </div>
         <div>
-          <dt>Remaining balance</dt>
+          <dt>Remaining accommodation balance</dt>
           <dd>{php.format(receipt.remainingBalanceMinor / 100)}</dd>
+        </div>
+        <div>
+          <dt>
+            Refundable security deposit
+            <br />
+            <small>Due upon check-in on the check-in day · separate from the down payment</small>
+          </dt>
+          <dd>{php.format((refundableSecurityDepositMinor ?? receipt.refundableSecurityDepositMinor ?? RECHELS_PLACE_REFUNDABLE_SECURITY_DEPOSIT_MINOR) / 100)}</dd>
         </div>
         {bookingStatus ? <div><dt>Booking status</dt><dd>{bookingStatus.replaceAll("_", " ")}</dd></div> : null}
         {paymentStatus ? <div><dt>Payment status</dt><dd>{paymentStatus.replaceAll("_", " ")}</dd></div> : null}
       </dl>
       <p>
-        This is a reference estimate based on the current Airbnb listing. Rechel
-        confirms the final rate, availability, house rules, and any deposit or
-        payment instructions after reviewing the request.
+        The 50% down payment secures the accommodation balance. The ₱1,000
+        refundable security deposit is separate and due upon check-in on that
+        day. Rechel confirms availability, house rules, and any final payment
+        instructions after reviewing the request.
       </p>
     </aside>
   );

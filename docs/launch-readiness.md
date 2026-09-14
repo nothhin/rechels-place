@@ -8,14 +8,12 @@
 - Pending enquiries kept distinct from confirmed reservations
 - PostgreSQL overlap protection, admin foundation, validation, health routes, and tests
 
-## Owner confirmation still required
+## Remaining owner confirmation still required
 
-- Final guest capacity and bed configuration
-- Nightly, weekend, holiday, cleaning, and additional-guest rates
-- Check-in and check-out times
-- Downpayment, cancellation, refund, rescheduling, and damage-deposit policies
+- Cancellation, refund, rescheduling, and damage-deposit policies beyond the configured ₱1,000 refundable security deposit
+- Any weekend, holiday, cleaning, or additional-guest pricing exceptions
 - House rules and complete amenity list
 - Final physical unit identifier
-- Payment account and payment-proof workflow
+- Final confirmation of the payment account and payment-proof workflow before production use
 
-Unconfirmed information must remain unpublished. The current Rechel's Place CDO inventory is configured as an entire two-bedroom condo, while payment collection remains disabled until the host confirms the final rate, deposit, and payment instructions.
+Unconfirmed information must remain unpublished. The current Rechel's Place CDO inventory is configured as an entire two-bedroom condo with a ₱4,500 nightly rate, 50% down payment, and separate ₱1,000 refundable security deposit due upon check-in. Payment collection remains disabled until the new hosting and Supabase environment is configured and verified.

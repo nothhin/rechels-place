@@ -26,6 +26,8 @@ const lifecycleNotificationsPath = fileURLToPath(new URL("./0015_booking_lifecyc
 const lifecycleNotifications = readFileSync(lifecycleNotificationsPath, "utf8");
 const pauseEmailNotificationsPath = fileURLToPath(new URL("./0016_pause_email_notifications.sql", import.meta.url));
 const pauseEmailNotifications = readFileSync(pauseEmailNotificationsPath, "utf8");
+const rechelPaymentRulesPath = fileURLToPath(new URL("../../../supabase/migrations/20260914120000_rechels_place_payment_rules.sql", import.meta.url));
+const rechelPaymentRules = readFileSync(rechelPaymentRulesPath, "utf8");
 
 describe("initial database migration", () => {
   it("enforces a single property settings row", () => {
@@ -190,5 +192,23 @@ describe("provisional catalogue seed", () => {
 
   it("does not invent a rate before owner approval", () => {
     expect(provisionalSeed).toContain("null, 0, 10, 'draft'");
+  });
+});
+
+describe("Rechel's Place payment rules", () => {
+  it("pins the nightly rate and separates the two payment obligations", () => {
+    expect(rechelPaymentRules).toContain("base_nightly_rate_minor = 450000");
+    expect(rechelPaymentRules).toContain("down_payment_amount_minor bigint not null default 0");
+    expect(rechelPaymentRules).toContain("down_payment := (booking_total + 1) / 2");
+    expect(rechelPaymentRules).toContain("deposit_amount_minor = 100000");
+    expect(rechelPaymentRules).toContain("'down_payment'");
+    expect(rechelPaymentRules).toContain("'securityDepositAmountMinor'");
+  });
+
+  it("keeps the independent guest source and Rechel booking references consistent", () => {
+    expect(rechelPaymentRules).toContain("new.source in ('snowaz_guest_web', 'guest_web')");
+    expect(rechelPaymentRules).toContain("'guest_web'");
+    expect(rechelPaymentRules).toContain("'RECHEL-' || upper(substr(replace(target_id::text, '-', ''), 1, 8))");
+    expect(rechelPaymentRules).toContain("'balance' and p.direction = 'payment'");
   });
 });

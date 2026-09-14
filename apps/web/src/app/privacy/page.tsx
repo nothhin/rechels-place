@@ -38,9 +38,11 @@ export default function PrivacyPage() {
             When you send a booking request, we collect your selected check-in
             and check-out dates, number of guests, full name, required contact
             number, optional email address, optional special requests, and a
-            record of your consent. During the
-            security-deposit step, we also collect the sender name, transaction
-            reference, deposit status, verification time, and refund reference.
+            record of your consent. During the payment-proof step, we also
+            collect the sender name, transaction reference, payment status,
+            verification time, and any applicable refund reference. The
+            separate ₱1,000 security deposit is due at check-in and is not
+            collected through this payment page.
             We do not collect your PIN, OTP, password, account balance, or full
             banking credentials. Our hosting and database services may also
             process limited technical and security records needed to operate and
@@ -93,7 +95,7 @@ export default function PrivacyPage() {
         <section>
           <h2>Security and public availability</h2>
           <p>
-            We use access controls, private random deposit links, and database
+            We use access controls, private random payment links, and database
             row-level security to limit public access. The availability calendar
             exposes stay dates and their booking status only; it does not
             display guest names, contact details, payment references, or special

@@ -222,7 +222,7 @@ export async function verifyDeposit(
   if (error || !updated)
     return {
       status: "error",
-      message: "A submitted deposit is required before verification.",
+      message: "A submitted down payment is required before verification.",
     };
   revalidatePath("/admin");
   revalidatePath("/admin/confirmed");
@@ -230,7 +230,7 @@ export async function verifyDeposit(
   revalidatePath("/");
   return {
     status: "success",
-    message: "Deposit verified and booking confirmed.",
+    message: "Down payment verified and booking confirmed.",
   };
 }
 
@@ -277,7 +277,7 @@ export async function recordAndVerifyDeposit(
   revalidatePath("/");
   return {
     status: "success",
-    message: "Messenger payment recorded, verified, and booking confirmed.",
+    message: "Down payment recorded, verified, and booking confirmed.",
   };
 }
 
@@ -308,10 +308,10 @@ export async function markDepositRefunded(
   if (error || !updated)
     return {
       status: "error",
-      message: "Only verified deposits can be marked refunded.",
+      message: "Only verified payment records can be marked refunded.",
     };
   revalidatePath("/admin");
-  return { status: "success", message: "Refund recorded." };
+  return { status: "success", message: "Applicable payment refund recorded." };
 }
 
 export async function updateBookingRequestStatus(
@@ -347,7 +347,7 @@ export async function updateBookingRequestStatus(
     message:
       parsed.data.status === "declined"
         ? "Booking request declined."
-        : "Booking cancelled. Any verified deposit is now awaiting refund.",
+        : "Booking cancelled. Any payment refund follows the host’s confirmed cancellation policy.",
   };
 }
 

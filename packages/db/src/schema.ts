@@ -146,6 +146,7 @@ export const bookingRequests = pgTable("booking_requests", {
   consentedAt: timestamp("consented_at", { withTimezone: true }).defaultNow().notNull(),
   depositStatus: depositStatus("deposit_status").notNull().default("not_requested"),
   depositAmountMinor: bigint("deposit_amount_minor", { mode: "number" }).notNull().default(100000),
+  downPaymentAmountMinor: bigint("down_payment_amount_minor", { mode: "number" }).notNull().default(0),
   depositTokenHash: text("deposit_token_hash"),
   depositTokenExpiresAt: timestamp("deposit_token_expires_at", { withTimezone: true }),
   depositSenderName: text("deposit_sender_name"),

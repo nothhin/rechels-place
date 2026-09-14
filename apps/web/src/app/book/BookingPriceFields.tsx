@@ -42,7 +42,7 @@ export default function BookingPriceFields({
             <strong>Entire two-bedroom condo</strong>
             <small>2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests</small>
           </span>
-          <b>Ask host</b>
+          <b>₱4,500/night</b>
         </div>
       </fieldset>
       <label>
@@ -56,7 +56,7 @@ export default function BookingPriceFields({
         </select>
         <small>Current Airbnb listing capacity: up to 6 guests.</small>
       </label>
-      <p className={styles.note}>Free street parking is listed on Airbnb. Ask the host about parking, early arrival, and late checkout when you send your request.</p>
+      <p className={styles.note}>Current rate: ₱4,500/night. A 50% down payment secures the accommodation balance, and the separate ₱1,000 refundable security deposit is due upon check-in on that day. Free street parking is listed on Airbnb; ask Rechel about arrival details when you send your request.</p>
       <BookingPriceReceipt checkIn={checkIn} checkOut={checkOut} guests={guests} bedroomChoice="both_bedrooms" parkingType="none" />
     </>
   );

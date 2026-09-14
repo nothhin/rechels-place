@@ -8,7 +8,9 @@ export const bedroomChoiceSchema = z.enum([
   "both_bedrooms",
 ]);
 export const parkingTypeSchema = z.enum(["none", "car", "motorcycle"]);
-export const RECHELS_PLACE_REFERENCE_NIGHTLY_RATE_MINOR = 480_000;
+export const RECHELS_PLACE_NIGHTLY_RATE_MINOR = 450_000;
+export const RECHELS_PLACE_REFUNDABLE_SECURITY_DEPOSIT_MINOR = 100_000;
+export const RECHELS_PLACE_DOWN_PAYMENT_PERCENT = 50;
 
 function isCalendarDate(value: string) {
   if (!ISO_DATE_PATTERN.test(value)) return false;
@@ -123,7 +125,7 @@ export function calculateSnowazNightlyRateMinor(
     if (guests === 3) return 195_000;
     return 210_000 + Math.max(0, guests - 4) * 25_000;
   }
-  return RECHELS_PLACE_REFERENCE_NIGHTLY_RATE_MINOR;
+  return RECHELS_PLACE_NIGHTLY_RATE_MINOR;
 }
 
 export function automaticBedroomChoice(guests: number) {
@@ -149,7 +151,7 @@ export function calculateSnowazBookingReceipt(
     throw new RangeError("Late checkout must be a whole number from 0 to 5 hours.");
   const nights = stayNights(checkIn, checkOut);
   const nightlyRateMinor = calculateSnowazNightlyRateMinor(guests, bedroomChoice);
-  const baseNightlyRateMinor = bedroomChoice === "both_bedrooms" ? RECHELS_PLACE_REFERENCE_NIGHTLY_RATE_MINOR : 170_000;
+  const baseNightlyRateMinor = bedroomChoice === "both_bedrooms" ? RECHELS_PLACE_NIGHTLY_RATE_MINOR : 170_000;
   const parkingNightlyRateMinor =
     parkingType === "car" ? 35_000 : parkingType === "motorcycle" ? 15_000 : 0;
   const parkingChargeMinor = parkingNightlyRateMinor * nights;
@@ -162,7 +164,9 @@ export function calculateSnowazBookingReceipt(
     calculateStayTotalMinor(baseNightlyRateMinor, nights) + additionalGuestChargeMinor;
   const extrasTotalMinor = parkingChargeMinor + timeExtensionChargeMinor;
   const totalMinor = accommodationSubtotalMinor + extrasTotalMinor;
-  const downPaymentMinor = null;
+  const downPaymentMinor = Math.ceil(
+    (totalMinor * RECHELS_PLACE_DOWN_PAYMENT_PERCENT) / 100,
+  );
   const earlyCheckInTime = earlyCheckInHours
     ? `${String(14 - earlyCheckInHours).padStart(2, "0")}:00`
     : null;
@@ -192,7 +196,8 @@ export function calculateSnowazBookingReceipt(
     extrasTotalMinor,
     totalMinor,
     downPaymentMinor,
-    remainingBalanceMinor: totalMinor,
+    refundableSecurityDepositMinor: RECHELS_PLACE_REFUNDABLE_SECURITY_DEPOSIT_MINOR,
+    remainingBalanceMinor: totalMinor - downPaymentMinor,
   } as const;
 }
 
