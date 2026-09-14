@@ -9,6 +9,7 @@ import {
   amenityGroups,
   galleryImages,
   galleryLinks,
+  galleryVideo,
   nearbyPlaces,
   propertyProfile,
   serviceContacts,
@@ -59,6 +60,26 @@ export default function Home() {
       <section className="pwa-section" id="spaces">
         <div className="pwa-section-title"><div><small>PHOTOS FROM THE LISTING</small><h2>Bright spaces for easy living.</h2></div><span>REAL<small>PHOTOS</small></span></div>
         <div className="pwa-gallery">{galleryImages.map((image, index) => <figure key={image.src} className={index === 0 ? "pwa-gallery-main" : ""}><Image src={image.src} alt={image.alt} fill sizes="(max-width: 720px) 70vw, 360px" /></figure>)}</div>
+        <div className="pwa-video-showcase">
+          <div className="pwa-video-copy">
+            <small>VIDEO TOUR</small>
+            <h3>See the space before you arrive.</h3>
+            <p>{propertyProfile.descriptor}, with {propertyProfile.maxGuests} guests, 2 bedrooms, {propertyProfile.bedLabel}, and {propertyProfile.bathroomLabel}.</p>
+            <div className="pwa-video-facts" aria-label="Property details">
+              <span>6 guests</span>
+              <span>2 bedrooms</span>
+              <span>5 beds</span>
+              <span>2.5 baths</span>
+            </div>
+          </div>
+          <figure className="pwa-video-frame">
+            <video controls playsInline preload="metadata" poster={galleryVideo.poster} aria-label={galleryVideo.alt}>
+              <source src={galleryVideo.src} type="video/mp4" />
+              Your browser does not support the property tour video.
+            </video>
+            <figcaption>Rechel’s Place · walkthrough video</figcaption>
+          </figure>
+        </div>
         <div className="pwa-tour-links">{galleryLinks.map((link, index) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer"><UiIcon name={index === 0 ? "image" : "message"} size={14} />{link.label} ↗</a>)}</div>
       </section>
 
@@ -86,7 +107,7 @@ export default function Home() {
 
       <section className="pwa-booking" id="availability" tabIndex={-1} aria-labelledby="availability-heading">
         <div className="pwa-book-heading"><span>LIVE AVAILABILITY · DIRECT WITH HOST</span><h2>Reserve your stay.</h2><p>Choose your preferred dates and contact Rechel directly. The current accommodation rate is ₱4,500 per night; a 50% down payment secures the stay, and the separate ₱1,000 refundable security deposit is due upon check-in on that day.</p></div>
-        <div className="pwa-config-card"><span>STAY CONFIGURATION</span><article><div><strong>Entire two-bedroom condo</strong><small>6 guests · 5 beds · 2.5 baths · Kitchen · Pool · Keypad</small></div><b>₱4,500/night</b></article><article><div><strong>Top guest favorite</strong><small>{propertyProfile.ratingLabel} from {propertyProfile.reviewCount} Airbnb reviews</small></div><b>Airbnb</b></article></div>
+        <div className="pwa-config-card"><span>STAY CONFIGURATION</span><article><div><strong>{propertyProfile.descriptor}</strong><small>{propertyProfile.maxGuests} guests · 2 bedrooms · {propertyProfile.bedLabel} · {propertyProfile.bathroomLabel} · Kitchen · Pool · Keypad</small></div><b>₱4,500/night</b></article><article><div><strong>Top guest favorite</strong><small>{propertyProfile.ratingLabel} from {propertyProfile.reviewCount} Airbnb reviews</small></div><b>Airbnb</b></article></div>
         <AvailabilityCalendar />
         <div className="pwa-returning"><strong>Already sent a request?</strong><SavedBookingLink /></div>
       </section>

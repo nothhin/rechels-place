@@ -1,7 +1,7 @@
 export const propertyProfile = {
   displayName: "Rechel's Place CDO",
   shortName: "Rechel's Place",
-  descriptor: "Entire condo · Cagayan de Oro",
+  descriptor: "Entire condo in Cagayan de Oro, Philippines",
   tagline: "Your home away from home in CDO awaits.",
   locationLabel: "Cagayan de Oro, Philippines",
   address: "1229 Avida Aspira Tower 1, Cagayan de Oro, Philippines 9000",
@@ -33,6 +33,12 @@ export const galleryImages = [
   { src: "/images/rechel-s-place/airbnb-kitchen-dining.jpg", alt: "Open-plan kitchen, dining, and living area" },
   { src: "/images/rechel-s-place/airbnb-kitchen.jpg", alt: "Fully equipped guest kitchen" },
 ] as const;
+
+export const galleryVideo = {
+  src: "/images/rechel-s-place/rechel-place-tour.mp4",
+  poster: "/images/rechel-s-place/airbnb-living-room.jpg",
+  alt: "Video walkthrough of Rechel's Place entire condo",
+} as const;
 
 export const galleryLinks = [
   { href: propertyProfile.airbnbUrl, label: "View more photos on Airbnb" },
