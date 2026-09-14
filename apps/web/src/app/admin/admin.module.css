@@ -2433,3 +2433,11 @@
 .airbnbLinkForm small { display: block; margin-top: 10px; color: #75685e; font-size: 11px; }
 .airbnbLinkForm .airbnbRestoreButton { margin-top: 10px; border: 1px solid #d9c9b8; background: #fff; color: #3c342d; }
 @media (max-width: 720px) { .airbnbLinkForm > div { flex-direction: column; } .airbnbLinkForm button { width: 100%; } }
+
+/* The fixed host bar must never cover the final card or focused control. */
+@media (max-width: 720px) {
+  .content {
+    padding-bottom: calc(124px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(124px + env(safe-area-inset-bottom));
+  }
+}

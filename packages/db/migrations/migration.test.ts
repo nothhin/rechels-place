@@ -28,6 +28,8 @@ const pauseEmailNotificationsPath = fileURLToPath(new URL("./0016_pause_email_no
 const pauseEmailNotifications = readFileSync(pauseEmailNotificationsPath, "utf8");
 const rechelPaymentRulesPath = fileURLToPath(new URL("../../../supabase/migrations/20260914120000_rechels_place_payment_rules.sql", import.meta.url));
 const rechelPaymentRules = readFileSync(rechelPaymentRulesPath, "utf8");
+const rechelAdminStatusPath = fileURLToPath(new URL("../../../supabase/migrations/20260914180000_admin_booking_status_actions.sql", import.meta.url));
+const rechelAdminStatus = readFileSync(rechelAdminStatusPath, "utf8");
 
 describe("initial database migration", () => {
   it("enforces a single property settings row", () => {
@@ -210,5 +212,15 @@ describe("Rechel's Place payment rules", () => {
     expect(rechelPaymentRules).toContain("'guest_web'");
     expect(rechelPaymentRules).toContain("'RECHEL-' || upper(substr(replace(target_id::text, '-', ''), 1, 8))");
     expect(rechelPaymentRules).toContain("'balance' and p.direction = 'payment'");
+  });
+});
+
+describe("Rechel's Place admin status actions", () => {
+  it("provides an authenticated, idempotent cancellation RPC", () => {
+    expect(rechelAdminStatus).toContain("create or replace function public.staff_update_snowaz_booking_status");
+    expect(rechelAdminStatus).toContain("status in ('pending', 'contacted', 'confirmed')");
+    expect(rechelAdminStatus).toContain("return coalesce(current_status = next_status, false)");
+    expect(rechelAdminStatus).toContain("revoke all on function public.staff_update_snowaz_booking_status(uuid, text)");
+    expect(rechelAdminStatus).toContain("to authenticated");
   });
 });

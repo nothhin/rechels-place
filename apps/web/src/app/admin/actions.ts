@@ -352,6 +352,8 @@ export async function updateBookingRequestStatus(
       message: "This booking can no longer be changed to that status.",
     };
   revalidatePath("/admin");
+  revalidatePath("/admin/confirmed");
+  revalidatePath("/admin/operations");
   revalidatePath("/");
   return {
     status: "success",
