@@ -41,7 +41,7 @@
   letter-spacing: 0.12em;
 }
 .card {
-  width: min(720px, calc(100% - 32px));
+  width: min(860px, calc(100% - 32px));
   min-width: 0;
   box-sizing: border-box;
   margin: 48px auto 0;
@@ -219,7 +219,9 @@
     display: none;
   }
   .card {
+    width: min(860px, calc(100% - 16px));
     margin-top: 16px;
+    padding: 22px 14px 38px;
   }
   .booking {
     flex-direction: column;
@@ -348,4 +350,9 @@
 @media (max-width: 560px) {
   .card :global(.device-status-alerts) { align-items: stretch; flex-direction: column; }
   .card :global(.device-status-alerts button) { width: 100%; }
+}
+@media (max-width: 560px) {
+  .guestEditor {
+    padding: 14px;
+  }
 }
