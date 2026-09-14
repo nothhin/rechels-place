@@ -45,10 +45,16 @@ export default function Home() {
       <div className="pwa-status"><span><i /> Online · Ready to book</span><span><UiIcon name="bolt" size={11} /> Live availability calendar</span></div>
 
       <section className="pwa-hero">
-        <Image src="/images/rechel-s-place/airbnb-living-room.jpg" alt="Rechel's Place living room with sofa, TV, and city view" fill priority sizes="(max-width: 720px) 100vw, 760px" />
-        <div className="pwa-hero-top"><span><UiIcon name="pin" size={12} /> {propertyProfile.locationLabel}</span><strong>Entire condo</strong></div>
-        <div className="pwa-hero-copy"><small>YOUR HOME AWAY FROM HOME</small><h1>Comfortable stays<br />in the heart of CDO.</h1><p>{propertyProfile.tagline}</p></div>
-        <div className="pwa-facts">{quickFacts.map(([icon, label]) => <div key={label}><span><UiIcon name={icon} size={19} /></span><strong>{label}</strong></div>)}</div>
+        <div className="pwa-hero-intro">
+          <div className="pwa-hero-top"><span><UiIcon name="pin" size={12} /> {propertyProfile.locationLabel}</span><strong>Entire condo</strong></div>
+          <div className="pwa-hero-copy"><small>STAY · REST · FEEL AT HOME</small><h1>Your quiet corner<br /><em>of Cagayan de Oro.</em></h1><p>{propertyProfile.tagline}</p></div>
+          <div className="pwa-hero-footnote">RECHEL’S PLACE <span>✦</span> A LITTLE MORE ROOM TO UNWIND</div>
+        </div>
+        <div className="pwa-hero-photo">
+          <Image src="/images/rechel-s-place/airbnb-living-room.jpg" alt="Rechel's Place living room with sofa, TV, and city view" fill priority sizes="(max-width: 700px) 100vw, 60vw" />
+          <div className="pwa-photo-caption"><span>01 / THE SPACE</span><strong>Come in. Stay awhile.</strong></div>
+        </div>
+        <div className="pwa-facts">{quickFacts.map(([icon, label]) => <div key={label}><span><UiIcon name={icon} size={22} /></span><strong>{label}</strong></div>)}</div>
       </section>
 
       <div className="pwa-primary-actions"><BookingLauncher><UiIcon name="calendar" size={17} />Reserve your dates</BookingLauncher><a href={propertyProfile.messengerUrl} target="_blank" rel="noreferrer"><UiIcon name="message" size={17} />Chat host</a></div>
