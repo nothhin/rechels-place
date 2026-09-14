@@ -25,8 +25,8 @@ type BookingPriceReceiptProps = {
 };
 
 const bedroomLabels = {
-  bedroom_1: "Master bedroom",
-  bedroom_2: "Second bedroom",
+  bedroom_1: "Legacy single-bedroom record",
+  bedroom_2: "Legacy single-bedroom record",
   both_bedrooms: "Entire two-bedroom condo",
 } as const;
 
@@ -110,18 +110,18 @@ export default function BookingPriceReceipt({
               : `${receipt.bedrooms} bedroom${receipt.bedrooms === 1 ? "" : "s"}`}
           </dd>
         </div>
-        <div><dt>Room description</dt><dd>{bedroomChoice === "bedroom_1" ? "Queen bed · Up to 2 guests" : bedroomChoice === "bedroom_2" ? "Double-size bunk bed" : "Entire unit · Maximum of 6 guests"}</dd></div>
+        <div><dt>Space description</dt><dd>{bedroomChoice === "both_bedrooms" ? "2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests" : "Legacy bedroom selection"}</dd></div>
         <div>
-          <dt>Base nightly rate</dt>
+          <dt>Reference nightly rate</dt>
           <dd>{php.format(receipt.baseNightlyRateMinor / 100)}</dd>
         </div>
         {receipt.additionalGuests > 0 ? (
           <div className="booking-receipt-additional">
             <dt>
-              Second-bedroom occupancy adjustment
+              Additional occupancy adjustment
               <br />
               <small>
-                {php.format(receipt.additionalGuestChargeMinor / receipt.nights / 100)} per night × {receipt.nights} night
+                Host-confirmed adjustment × {receipt.nights} night
                 {receipt.nights === 1 ? "" : "s"}
               </small>
             </dt>
@@ -141,17 +141,17 @@ export default function BookingPriceReceipt({
             <dd>+{php.format(receipt.parkingChargeMinor / 100)}</dd>
           </div>
         ) : null}
-        {receipt.earlyCheckInFeeMinor > 0 ? <div className="booking-receipt-additional"><dt>Early check-in<br /><small>{receipt.earlyCheckInHours} hour{receipt.earlyCheckInHours === 1 ? "" : "s"} early · {receipt.earlyCheckInTime} · ₱150/hour</small></dt><dd>+{php.format(receipt.earlyCheckInFeeMinor / 100)}</dd></div> : null}
-        {receipt.lateCheckoutFeeMinor > 0 ? <div className="booking-receipt-additional"><dt>Late checkout<br /><small>{receipt.lateCheckoutHours} hour{receipt.lateCheckoutHours === 1 ? "" : "s"} late · {receipt.lateCheckoutTime} · ₱150/hour</small></dt><dd>+{php.format(receipt.lateCheckoutFeeMinor / 100)}</dd></div> : null}
+        {receipt.earlyCheckInFeeMinor > 0 ? <div className="booking-receipt-additional"><dt>Early check-in<br /><small>{receipt.earlyCheckInHours} hour{receipt.earlyCheckInHours === 1 ? "" : "s"} early · Host confirms availability</small></dt><dd>+{php.format(receipt.earlyCheckInFeeMinor / 100)}</dd></div> : null}
+        {receipt.lateCheckoutFeeMinor > 0 ? <div className="booking-receipt-additional"><dt>Late checkout<br /><small>{receipt.lateCheckoutHours} hour{receipt.lateCheckoutHours === 1 ? "" : "s"} late · Host confirms availability</small></dt><dd>+{php.format(receipt.lateCheckoutFeeMinor / 100)}</dd></div> : null}
         <div><dt>Accommodation subtotal</dt><dd>{php.format(receipt.accommodationSubtotalMinor / 100)}</dd></div>
         {receipt.extrasTotalMinor > 0 ? <div><dt>Extras total</dt><dd>+{php.format(receipt.extrasTotalMinor / 100)}</dd></div> : null}
         <div className="booking-receipt-total">
-          <dt>Final total</dt>
+          <dt>Estimated stay total</dt>
           <dd>{php.format(receipt.totalMinor / 100)}</dd>
         </div>
         <div className="booking-receipt-down">
-          <dt>Refundable security deposit</dt>
-          <dd>{php.format(receipt.downPaymentMinor / 100)}</dd>
+          <dt>Security deposit</dt>
+          <dd>Host confirms</dd>
         </div>
         <div>
           <dt>Remaining balance</dt>
@@ -161,8 +161,9 @@ export default function BookingPriceReceipt({
         {paymentStatus ? <div><dt>Payment status</dt><dd>{paymentStatus.replaceAll("_", " ")}</dd></div> : null}
       </dl>
       <p>
-        The ₱1,000 security deposit is refundable after checkout and is separate
-        from the accommodation total. It is verified manually.
+        This is a reference estimate based on the current Airbnb listing. Rechel
+        confirms the final rate, availability, house rules, and any deposit or
+        payment instructions after reviewing the request.
       </p>
     </aside>
   );

@@ -22,16 +22,11 @@ export async function updatePendingGuestCount(
     .object({
       token: z.string().refine(isValidDepositToken),
       guests: z.coerce.number().int().min(1).max(6),
-      bedroom: z.enum(["bedroom_1", "bedroom_2"]),
-      parkingType: z.enum(["none", "car", "motorcycle"]),
-      earlyCheckInHours: z.coerce.number().int().min(0).max(5),
-      lateCheckoutHours: z.coerce.number().int().min(0).max(5),
+      bedroom: z.literal("both_bedrooms"),
+      parkingType: z.literal("none"),
+      earlyCheckInHours: z.coerce.number().int().min(0).max(0),
+      lateCheckoutHours: z.coerce.number().int().min(0).max(0),
     })
-    .refine(
-      (value) =>
-        (value.bedroom === "bedroom_1" && value.guests <= 2) ||
-        (value.bedroom === "bedroom_2" && value.guests <= 6),
-    )
     .safeParse({
       token: formData.get("token"),
       guests: formData.get("guests"),
@@ -71,7 +66,7 @@ export async function updatePendingGuestCount(
   revalidatePath("/admin/operations");
   return {
     status: "success",
-    message: "Guest count, bedroom, parking, optional time, and booking total updated.",
+      message: "Guest count and booking total updated.",
   };
 }
 
@@ -81,13 +76,11 @@ export async function submitDepositReference(formData: FormData) {
       token: z.string().refine(isValidDepositToken),
       senderName: z.string().trim().min(2).max(120),
       reference: z.string().trim().min(6).max(80),
-      confirmedAmount: z.literal("1000"),
     })
     .safeParse({
       token: formData.get("token"),
       senderName: formData.get("senderName"),
       reference: formData.get("reference"),
-      confirmedAmount: formData.get("confirmedAmount"),
     });
   if (!parsed.success)
     redirect(

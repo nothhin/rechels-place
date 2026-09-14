@@ -10,7 +10,7 @@ const displayFont = EB_Garamond({ variable: "--font-display", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: { default: "Rechel's Place | Staycation", template: "%s | Rechel's Place" },
-  description: "Stay in a fully furnished two-bedroom condo with Wi-Fi, a 55-inch HDTV, kitchen, air conditioning, and smart self check-in at Deca Homes Tower 1, Banilad, Cebu City.",
+  description: "Stay in Rechel's entire two-bedroom condo in Cagayan de Oro, with 5 beds, 2.5 baths, 31 Mbps Wi-Fi, a 65-inch HDTV, pool access, and keypad self check-in.",
   applicationName: "Rechel's Place",
   manifest: "/manifest.webmanifest",
   appleWebApp: {

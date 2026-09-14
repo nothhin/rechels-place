@@ -31,17 +31,10 @@ async function saveBookingRequest(formData: FormData) {
         "Online requests are temporarily unavailable. Please contact Rechel's Place directly.",
     };
   const depositToken = createDepositToken();
-  const bedroomLabel =
-    parsed.data.bedroomChoice === "bedroom_1"
-      ? "Bedroom 1"
-      : parsed.data.bedroomChoice === "bedroom_2"
-        ? "Bedroom 2"
-        : "Both bedrooms";
+  const bedroomLabel = "Entire two-bedroom condo";
   const bookingRequests = [
-    `Bedroom selection: ${bedroomLabel}`,
+    `Stay selection: ${bedroomLabel}`,
     parsed.data.specialRequests,
-    parsed.data.earlyCheckInHours ? `Early check-in: ${parsed.data.earlyCheckInHours} hour(s) at ₱150/hour` : "",
-    parsed.data.lateCheckoutHours ? `Late checkout: ${parsed.data.lateCheckoutHours} hour(s) at ₱150/hour` : "",
   ]
     .filter(Boolean)
     .join("\n");

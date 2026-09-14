@@ -21,12 +21,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";
-const php = new Intl.NumberFormat("en-PH", {
-  style: "currency",
-  currency: "PHP",
-  maximumFractionDigits: 0,
-});
-
 export default async function DepositPage({
   params,
   searchParams,
@@ -174,20 +168,13 @@ export default async function DepositPage({
           <>
             <section className={styles.instructions}>
               <h2>
-                Pay refundable security deposit of {php.format(request.depositAmountMinor / 100)} through
-                InstaPay
+                Confirm payment details with Rechel before sending money
               </h2>
               <ol>
-                <li>Use the payment account and QR code provided by the Rechel’s Place host.</li>
-                <li>Confirm the recipient name and account details before sending any money.</li>
-                <li>
-                  Enter exactly <strong>₱1,000</strong> as the refundable security deposit and complete the
-                  transfer.
-                </li>
-                <li>
-                  Return here and submit the sender name and transaction
-                  reference.
-                </li>
+                <li>Wait for Rechel to confirm availability, the final stay total, and any deposit requirement.</li>
+                <li>Confirm the recipient name and account details directly with the host before sending any money.</li>
+                <li>Use only the payment method and amount that Rechel confirms for this booking.</li>
+                <li>Return here and submit the sender name and transaction reference only after payment instructions are confirmed.</li>
               </ol>
               <p>
                 Never share your PIN, OTP, password, or full banking credentials
@@ -195,11 +182,11 @@ export default async function DepositPage({
               </p>
             </section>
             <div className={styles.qr}>
-              <p>Payment QR setup is pending. Confirm the recipient details with the host before transferring the deposit.</p>
+              <p>Payment details are intentionally not displayed on this page. Confirm the recipient and amount with Rechel before transferring anything.</p>
             </div>
             <section className={styles.proofOptions}>
               <p className={styles.eyebrow}>Required payment proof</p>
-              <div className={styles.proofGrid}><article><span>Messenger only</span><h2>Send your receipt screenshot</h2><p>Open Messenger, paste the prepared message, and attach a clear screenshot of your successful GCash transfer. The host will verify it manually, then send your private guest access guide.</p><MessengerReceiptLink className={styles.messengerAction} label="Copy message and open Messenger" message={`Hello Rechel’s Place! I am ${request.fullName}. I paid the ₱${(request.depositAmountMinor / 100).toLocaleString()} booking down payment for my stay on ${formatStayDate(request.checkIn)} to ${formatStayDate(request.checkOut)}. I am attaching my GCash payment receipt for verification.`}/></article></div>
+              <div className={styles.proofGrid}><article><span>Messenger only</span><h2>Send your receipt screenshot</h2><p>Open Messenger, paste the prepared message, and attach a clear screenshot of the completed transfer using the payment method Rechel confirmed. The host will verify it manually, then send your private guest access guide.</p><MessengerReceiptLink className={styles.messengerAction} label="Copy message and open Messenger" message={`Hello Rechel’s Place! I am ${request.fullName}. I paid the amount confirmed for my stay on ${formatStayDate(request.checkIn)} to ${formatStayDate(request.checkOut)}. I am attaching my payment receipt for verification.`}/></article></div>
             </section>
           </>
         )}
@@ -212,7 +199,7 @@ export default async function DepositPage({
           <MessengerReceiptLink
             className={styles.messengerAction}
             label="Request cancellation or refund in Messenger"
-            message={`Hello Rechel’s Place! I am ${request.fullName}. I would like help cancelling my stay on ${formatStayDate(request.checkIn)} to ${formatStayDate(request.checkOut)}${request.depositStatus === "verified" || request.depositStatus === "refund_pending" ? " and requesting the return of my ₱1,000 down payment" : ""}. Please confirm the next steps.`}
+            message={`Hello Rechel’s Place! I am ${request.fullName}. I would like help cancelling my stay on ${formatStayDate(request.checkIn)} to ${formatStayDate(request.checkOut)}${request.depositStatus === "verified" || request.depositStatus === "refund_pending" ? " and requesting the return of my refundable deposit" : ""}. Please confirm the next steps.`}
           />
           <div className={styles.helpActions}>
             <a

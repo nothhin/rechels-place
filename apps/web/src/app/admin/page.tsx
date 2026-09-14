@@ -93,7 +93,7 @@ export default async function AdminDashboard({
           <Image src="/images/rechel-s-place/logo.svg" alt="Rechel's Place" width={58} height={58} />
           <div>
             <strong>Rechel’s Place</strong>
-            <small>Host workspace · Cebu</small>
+            <small>Host workspace · Cagayan de Oro</small>
           </div>
         </Link>
         <AdminNav activeClassName={styles.activeNav} />
@@ -146,7 +146,7 @@ export default async function AdminDashboard({
             <Link href="/admin/operations"><span aria-hidden="true">₱</span><small>Rate override</small></Link>
           </section>
           <section className={styles.sanctuaryCard} aria-label="Property status">
-            <div className={styles.sanctuaryHeader}><div><p className={styles.eyebrow}>Sanctuary status</p><h2>Unit 654 · Two-bedroom condo</h2></div><span className={styles.statusPill}>LIVE</span></div>
+            <div className={styles.sanctuaryHeader}><div><p className={styles.eyebrow}>Sanctuary status</p><h2>Avida Aspira Tower 1 · Two-bedroom condo</h2></div><span className={styles.statusPill}>LIVE</span></div>
             <div className={styles.sanctuaryBody}><div><strong>{staying ? "Currently staying" : "Ready for guests"}</strong><small>{staying ? `${staying} confirmed stay in the condo` : "No active guest stay right now"}</small></div><div className={styles.sanctuaryMeta}><span>{confirmed.length} confirmed</span><span>{requests.length} awaiting action</span></div></div>
           </section>
       <section className={styles.metricsGrid} aria-label="Property summary">

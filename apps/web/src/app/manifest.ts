@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Rechel's Place",
     short_name: "Rechel's Place",
     description:
-      "Book a fully furnished two-bedroom condo at Deca Homes Tower 1, Banilad, Cebu City.",
+      "Book Rechel's entire two-bedroom condo in Cagayan de Oro for up to 6 guests.",
     start_url: "/",
     display: "standalone",
     background_color: "#f7f3ed",
@@ -14,7 +14,7 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         src: "/images/rechel-s-place/logo.svg",
         sizes: "200x200",
-        type: "image/png",
+        type: "image/svg+xml",
         purpose: "any",
       },
     ],

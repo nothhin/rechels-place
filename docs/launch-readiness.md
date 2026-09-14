@@ -18,4 +18,4 @@
 - Final physical unit identifier
 - Payment account and payment-proof workflow
 
-Unconfirmed information must remain unpublished. The provisional SnowAZ inventory is stored as a draft and out of service until these values are approved.
+Unconfirmed information must remain unpublished. The current Rechel's Place CDO inventory is configured as an entire two-bedroom condo, while payment collection remains disabled until the host confirms the final rate, deposit, and payment instructions.

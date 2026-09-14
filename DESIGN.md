@@ -68,7 +68,7 @@ This project uses the exact **Modern Luxury Staycation** visual preset exported 
 
 ## Explore screen
 
-The mobile PWA composition follows the Stitch screen in this order: compact brand/status header, install prompt, online state, photographic hero with overlaid location and facts, paired reservation actions, horizontally browsable space gallery, stay configurations, comfort grid, Cebu address, reservation lookup, and a persistent five-item bottom navigation with an elevated Book action.
+The mobile PWA composition follows the Stitch screen in this order: compact brand/status header, install prompt, online state, photographic hero with overlaid location and facts, paired reservation actions, horizontally browsable space gallery, stay configurations, comfort grid, Cagayan de Oro address, reservation lookup, and a persistent five-item bottom navigation with an elevated Book action.
 
 ## Booking screen
 

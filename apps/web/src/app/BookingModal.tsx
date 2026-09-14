@@ -37,12 +37,10 @@ export default function BookingModal({
   const [selectedCheckIn, setSelectedCheckIn] = useState(checkIn);
   const [selectedCheckOut, setSelectedCheckOut] = useState(checkOut);
   const [guests, setGuests] = useState(2);
-  const [bedroomChoice, setBedroomChoice] = useState<"bedroom_1" | "bedroom_2">("bedroom_1");
-  const [parkingType, setParkingType] = useState<"none" | "car" | "motorcycle">(
-    "none",
-  );
-  const [earlyCheckInHours, setEarlyCheckInHours] = useState(0);
-  const [lateCheckoutHours, setLateCheckoutHours] = useState(0);
+  const [bedroomChoice] = useState<"both_bedrooms">("both_bedrooms");
+  const [parkingType] = useState<"none">("none");
+  const [earlyCheckInHours] = useState(0);
+  const [lateCheckoutHours] = useState(0);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const formRef = useRef<HTMLFormElement>(null);
   const availabilityNotified = useRef(false);
@@ -116,11 +114,7 @@ export default function BookingModal({
   ]);
 
   const adjustGuests = (change: number) =>
-    setGuests((value) => {
-      const next = Math.min(6, Math.max(1, value + change));
-      if (next > 2) setBedroomChoice("bedroom_2");
-      return next;
-    });
+    setGuests((value) => Math.min(6, Math.max(1, value + change)));
 
   return (
     <div
@@ -267,46 +261,16 @@ export default function BookingModal({
                 <section className="booking-suite-section">
                   <span>CHOOSE YOUR STAY</span>
                   <div className="booking-room-options">
-                    {(
-                      [
-                        [
-                          "bedroom_1",
-                          "Master bedroom",
-                          "Queen bed · Shared kitchen and bathroom",
-                          "₱1,700 / night",
-                        ],
-                        [
-                          "bedroom_2",
-                          "Second bedroom",
-                          "Double-size bunk bed · Occupancy pricing applies",
-                          "₱1,700 / night",
-                        ],
-                      ] as const
-                    ).map(([value, title, detail, price]) => (
-                      <button
-                        type="button"
-                        className={
-                          bedroomChoice === value ? "selected" : undefined
-                        }
-                        onClick={() => setBedroomChoice(value)}
-                        key={value}
-                      >
-                        <span>
-                          <strong>{title}</strong>
-                          <small>{detail}</small>
-                        </span>
-                        <b>{price}</b>
-                      </button>
-                    ))}
+                    <div className="selected">
+                      <span>
+                        <strong>Entire two-bedroom condo</strong>
+                        <small>2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests</small>
+                      </span>
+                      <b>Ask host</b>
+                    </div>
                   </div>
                 </section>
-                <section className="booking-time-section">
-                  <div className="booking-section-label"><span>OPTIONAL EXTRA TIME</span><small>Regular check-in is 2:00 PM · check-out is 11:00 AM · ₱150/hour</small></div>
-                  <div className="booking-modal-grid">
-                    <label><span>Early check-in</span><select value={earlyCheckInHours} onChange={(event) => { const value = Number(event.target.value); setEarlyCheckInHours(value); if (value) void showSuccess("Early check-in is subject to availability. We will flag it for host confirmation if another guest is checking out that day."); }}><option value={0}>No early check-in</option>{[1,2,3,4,5].map((hour) => <option key={hour} value={hour}>{hour} hour{hour === 1 ? "" : "s"} early · ₱{hour * 150}</option>)}</select></label>
-                    <label><span>Late checkout</span><select value={lateCheckoutHours} onChange={(event) => { const value = Number(event.target.value); setLateCheckoutHours(value); if (value) void showSuccess("Late checkout is subject to availability. We will flag it for host confirmation if another guest is arriving that day."); }}><option value={0}>No late checkout</option>{[1,2,3,4,5].map((hour) => <option key={hour} value={hour}>{hour} hour{hour === 1 ? "" : "s"} late · ₱{hour * 150}</option>)}</select></label>
-                  </div>
-                </section>
+                <p className="booking-source-note">Free street parking is listed on Airbnb. Ask Rechel about parking, early arrival, or late checkout when you send your request.</p>
                 <section className="booking-date-section">
                   <div className="booking-section-label">
                     <span>CALENDAR</span>
@@ -370,55 +334,35 @@ export default function BookingModal({
                     <input type="hidden" name="guests" value={guests} />
                   </div>
                   <div className="booking-selected-room-copy">
-                    <strong>{bedroomChoice === "bedroom_1" ? "Master bedroom" : "Second bedroom"}</strong>
-                    <small>{bedroomChoice === "bedroom_1" ? "Queen bed · Maximum 2 guests · ₱1,700/night" : "Double-size bunk bed · 2 pax ₱1,700 · 3 pax ₱1,950 · 4 pax ₱2,100 · +₱250 per guest after 4"}</small>
+                    <strong>Entire two-bedroom condo</strong>
+                    <small>2 bedrooms · 5 beds · 2.5 baths · Maximum 6 guests</small>
                   </div>
                 </section>
                 <section className="booking-parking-section">
                   <div className="booking-section-label">
                     <span>PARKING</span>
-                    <small>Optional, subject to availability</small>
+                    <small>Free street parking is listed on Airbnb</small>
                   </div>
-                  <div className="booking-parking-options">
-                    {(
-                      [
-                        ["none", "No parking", "₱0 / night"],
-                        ["car", "Car parking", "₱350 / night"],
-                        ["motorcycle", "Motorcycle parking", "₱150 / night"],
-                      ] as const
-                    ).map(([value, label, price]) => (
-                      <button
-                        type="button"
-                        className={
-                          parkingType === value ? "selected" : undefined
-                        }
-                        onClick={() => setParkingType(value)}
-                        key={value}
-                      >
-                        <strong>{label}</strong>
-                        <b>{price}</b>
-                      </button>
-                    ))}
-                  </div>
+                  <p className="booking-source-note">Parking details and any building restrictions are confirmed by the host.</p>
                 </section>
                 <div className="booking-preview-photos">
                   <figure>
                     <Image
-                      src={bedroomChoice === "bedroom_1" ? "/images/uppadar-hollie/master-bedroom.jpg" : "/images/uppadar-hollie/second-bedroom-bunk-wide.png"}
-                      alt={bedroomChoice === "bedroom_1" ? "Master bedroom with queen bed" : "Second bedroom with double-size bunk bed"}
+                      src="/images/rechel-s-place/airbnb-bedroom-1.jpg"
+                      alt="Primary bedroom with a queen bed and city view"
                       fill
                       sizes="220px"
                     />
-                    <figcaption>{bedroomChoice === "bedroom_1" ? "Master bedroom · Queen bed" : "Second bedroom · Double-size bunk bed"}</figcaption>
+                    <figcaption>Primary bedroom · Queen bed</figcaption>
                   </figure>
                   <figure>
                     <Image
-                      src="/images/uppadar-hollie/dining-table.png"
-                      alt="Living and dining area"
+                      src="/images/rechel-s-place/airbnb-living-room.jpg"
+                      alt="Living room with sofa, TV, and city view"
                       fill
                       sizes="220px"
                     />
-                    <figcaption>Living &amp; dining</figcaption>
+                    <figcaption>Living room · 65-inch TV</figcaption>
                   </figure>
                 </div>
                 <section className="booking-contact-section">

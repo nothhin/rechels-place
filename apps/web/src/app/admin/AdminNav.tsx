@@ -60,7 +60,7 @@ export function AdminBottomNav({ className, activeClassName }: { className: stri
     { label: "Overview", href: "/admin#overview", id: "overview", icon: "home" },
     { label: "Calendar", href: "/admin#calendar", id: "calendar", icon: "calendar" },
     { label: "Guests", href: "/admin#booking-requests", id: "booking-requests", icon: "users" },
-    { label: "Locks & IoT", href: "/admin/operations", id: "operations", icon: "locks" },
+    { label: "Operations", href: "/admin/operations", id: "operations", icon: "locks" },
     { label: "More", href: "/admin/confirmed", id: "confirmed", icon: "menu" },
   ] as const;
   return <nav className={className} aria-label="Mobile host workspace">{items.map(item => <Link prefetch className={active === item.id ? activeClassName : undefined} href={item.href} key={item.id}><AdminNavIcon name={item.icon} /><small>{item.label}</small></Link>)}</nav>;

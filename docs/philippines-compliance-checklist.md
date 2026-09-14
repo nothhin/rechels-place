@@ -1,4 +1,4 @@
-# SnowAZ Philippines compliance checklist
+# Rechel's Place CDO Philippines compliance checklist
 
 This is an implementation checklist, not legal advice. Confirm business-specific facts with the owner and, where appropriate, a Philippine lawyer, accountant, the condominium administration, and the relevant government office before publishing final policies.
 
@@ -13,7 +13,7 @@ This is an implementation checklist, not legal advice. Confirm business-specific
 - Availability exposes date ranges only and does not expose guest identities.
 - The public form enforces 1–8 guests and a future stay of no more than 366 days.
 - Known deposit, bedroom-access, smoking, pet, balcony, and parking conditions are shown before submission.
-- The homepage publishes the SnowAZ contact number, email address, unit location, and service description.
+- The homepage publishes Rechel's Place CDO contact number, email address, Avida Aspira Tower 1 location, and the current condo service description.
 
 ## Owner decisions required before final legal pages
 

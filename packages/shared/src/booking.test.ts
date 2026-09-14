@@ -52,7 +52,7 @@ describe("booking enquiries", () => {
     checkIn: "2026-09-01",
     checkOut: "2026-09-02",
     guests: "2",
-    bedroomChoice: "bedroom_1",
+    bedroomChoice: "both_bedrooms",
     fullName: "Guest Name",
     email: "",
     phone: "09951234567",
@@ -64,32 +64,18 @@ describe("booking enquiries", () => {
   };
   it("allows an optional email when the required phone number is provided", () =>
     expect(bookingEnquirySchema.safeParse(request).success).toBe(true));
-  it("allows either individual bedroom for up to two guests", () => {
-    expect(
-      bookingEnquirySchema.safeParse({ ...request, bedroomChoice: "bedroom_1" })
-        .success,
-    ).toBe(true);
-    expect(
-      bookingEnquirySchema.safeParse({ ...request, bedroomChoice: "bedroom_2" })
-        .success,
-    ).toBe(true);
-  });
-  it("allows Bedroom 2 for three or four guests", () =>
-    expect(
-      bookingEnquirySchema.safeParse({
-        ...request,
-        guests: "3",
-        bedroomChoice: "bedroom_2",
-      }).success,
-    ).toBe(true));
-  it("allows Bedroom 2 for up to six guests", () =>
+  it("accepts the entire two-bedroom condo for up to six guests", () =>
     expect(
       bookingEnquirySchema.safeParse({
         ...request,
         guests: "6",
-        bedroomChoice: "bedroom_2",
+        bedroomChoice: "both_bedrooms",
       }).success,
     ).toBe(true));
+  it("rejects individual-bedroom selections for the whole-condo booking flow", () =>
+    expect(
+      bookingEnquirySchema.safeParse({ ...request, bedroomChoice: "bedroom_1" }).success,
+    ).toBe(false));
   it("rejects more than six guests", () =>
     expect(
       bookingEnquirySchema.safeParse({ ...request, guests: "7" }).success,
@@ -102,27 +88,28 @@ describe("booking enquiries", () => {
 });
 
 describe("money calculations", () => {
-  it("uses the provisional Uppadar bedroom prices", () => {
-    expect(calculateSnowazNightlyRateMinor(2, "bedroom_1")).toBe(170_000);
-    expect(calculateSnowazNightlyRateMinor(2, "bedroom_2")).toBe(170_000);
-    expect(calculateSnowazNightlyRateMinor(3, "bedroom_2")).toBe(195_000);
-    expect(calculateSnowazNightlyRateMinor(4, "bedroom_2")).toBe(210_000);
-    expect(calculateSnowazNightlyRateMinor(5, "bedroom_2")).toBe(235_000);
+  it("uses the current whole-condo Airbnb reference rate", () => {
+    expect(calculateSnowazNightlyRateMinor(2, "both_bedrooms")).toBe(480_000);
+    expect(calculateSnowazNightlyRateMinor(6, "both_bedrooms")).toBe(480_000);
     expect(() => calculateSnowazNightlyRateMinor(7)).toThrow(RangeError);
   });
 
-  it("builds a receipt with the required down payment and remaining balance", () => {
+  it("defaults new pricing requests to the whole-condo rate", () => {
+    expect(calculateSnowazNightlyRateMinor(2)).toBe(480_000);
+  });
+
+  it("builds a receipt with a host-confirmed deposit and remaining balance", () => {
     expect(
-      calculateSnowazBookingReceipt("2026-09-01", "2026-09-04", 5, "none", "bedroom_2"),
+      calculateSnowazBookingReceipt("2026-09-01", "2026-09-04", 5, "none", "both_bedrooms"),
     ).toEqual({
       nights: 3,
       guests: 5,
-      bedrooms: 1,
-      baseNightlyRateMinor: 170_000,
-      nightlyRateMinor: 235_000,
-      additionalGuests: 3,
-      additionalGuestChargeMinor: 195_000,
-      accommodationSubtotalMinor: 705_000,
+      bedrooms: 2,
+      baseNightlyRateMinor: 480_000,
+      nightlyRateMinor: 480_000,
+      additionalGuests: 0,
+      additionalGuestChargeMinor: 0,
+      accommodationSubtotalMinor: 1_440_000,
       parkingType: "none",
       parkingNightlyRateMinor: 0,
       parkingChargeMinor: 0,
@@ -134,9 +121,9 @@ describe("money calculations", () => {
       lateCheckoutFeeMinor: 0,
       timeExtensionChargeMinor: 0,
       extrasTotalMinor: 0,
-      totalMinor: 705_000,
-      downPaymentMinor: 100_000,
-      remainingBalanceMinor: 705_000,
+      totalMinor: 1_440_000,
+      downPaymentMinor: null,
+      remainingBalanceMinor: 1_440_000,
     });
   });
   it("adds optional parking per night", () => {

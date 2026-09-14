@@ -1,4 +1,4 @@
-.shell { min-height:100svh; display:grid; place-items:center; padding:24px; background:linear-gradient(120deg,rgba(49,38,30,.86),rgba(49,38,30,.5)),url('/images/uppadar-hollie/hero.jpg') center/cover fixed; }
+.shell { min-height:100svh; display:grid; place-items:center; padding:24px; background:linear-gradient(120deg,rgba(49,38,30,.86),rgba(49,38,30,.5)),url('/images/rechel-s-place/airbnb-living-room.jpg') center/cover fixed; }
 .card { width:min(100%,460px); padding:clamp(30px,6vw,50px); border:1px solid rgba(183,138,67,.3); border-radius:24px; background:rgba(255,253,250,.96); box-shadow:0 32px 100px rgba(34,24,17,.42); backdrop-filter:blur(14px); }
 .brand { display:flex; align-items:center; gap:13px; color:#302a25; }
 .brand > img { width:48px; height:48px; object-fit:cover; border-radius:50%; box-shadow:0 0 0 3px #f1e3d4; }

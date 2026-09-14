@@ -8,6 +8,7 @@ export const bedroomChoiceSchema = z.enum([
   "both_bedrooms",
 ]);
 export const parkingTypeSchema = z.enum(["none", "car", "motorcycle"]);
+export const RECHELS_PLACE_REFERENCE_NIGHTLY_RATE_MINOR = 480_000;
 
 function isCalendarDate(value: string) {
   if (!ISO_DATE_PATTERN.test(value)) return false;
@@ -61,7 +62,7 @@ export const reservationRequestSchema = staySchema.extend({
 export const bookingEnquirySchema = staySchema.extend({
     roomTypeId: z.string().uuid().optional().or(z.literal("")),
     guests: z.coerce.number().int().min(1).max(6),
-    bedroomChoice: bedroomChoiceSchema,
+    bedroomChoice: z.literal("both_bedrooms"),
     parkingType: parkingTypeSchema.default("none"),
     earlyCheckInHours: z.coerce.number().int().min(0).max(5).default(0),
     lateCheckoutHours: z.coerce.number().int().min(0).max(5).default(0),
@@ -78,16 +79,7 @@ export const bookingEnquirySchema = staySchema.extend({
     }),
     idempotencyKey: z.string().uuid(),
     website: z.string().max(0).optional().or(z.literal("")),
-  }).refine(
-    ({ guests, bedroomChoice }) =>
-      bedroomChoice === "both_bedrooms" ||
-      (bedroomChoice === "bedroom_1" && guests <= 2) ||
-      (bedroomChoice === "bedroom_2" && guests <= 6),
-    {
-      message: "The selected space cannot accommodate that many guests.",
-      path: ["bedroomChoice"],
-    },
-  );
+  });
 
 export function stayNights(checkIn: string, checkOut: string) {
   const parsed = staySchema.parse({ checkIn, checkOut });
@@ -119,7 +111,7 @@ export function calculateStayTotalMinor(
 
 export function calculateSnowazNightlyRateMinor(
   guests: number,
-  bedroomChoice: "bedroom_1" | "bedroom_2" | "both_bedrooms" = automaticBedroomChoice(guests),
+  bedroomChoice: "bedroom_1" | "bedroom_2" | "both_bedrooms" = "both_bedrooms",
 ) {
   if (!Number.isSafeInteger(guests) || guests < 1 || guests > 6) {
     throw new RangeError("Guest count must be a whole number from 1 to 6.");
@@ -131,7 +123,7 @@ export function calculateSnowazNightlyRateMinor(
     if (guests === 3) return 195_000;
     return 210_000 + Math.max(0, guests - 4) * 25_000;
   }
-  return 220_000;
+  return RECHELS_PLACE_REFERENCE_NIGHTLY_RATE_MINOR;
 }
 
 export function automaticBedroomChoice(guests: number) {
@@ -157,7 +149,7 @@ export function calculateSnowazBookingReceipt(
     throw new RangeError("Late checkout must be a whole number from 0 to 5 hours.");
   const nights = stayNights(checkIn, checkOut);
   const nightlyRateMinor = calculateSnowazNightlyRateMinor(guests, bedroomChoice);
-  const baseNightlyRateMinor = bedroomChoice === "both_bedrooms" ? 220_000 : 170_000;
+  const baseNightlyRateMinor = bedroomChoice === "both_bedrooms" ? RECHELS_PLACE_REFERENCE_NIGHTLY_RATE_MINOR : 170_000;
   const parkingNightlyRateMinor =
     parkingType === "car" ? 35_000 : parkingType === "motorcycle" ? 15_000 : 0;
   const parkingChargeMinor = parkingNightlyRateMinor * nights;
@@ -170,7 +162,7 @@ export function calculateSnowazBookingReceipt(
     calculateStayTotalMinor(baseNightlyRateMinor, nights) + additionalGuestChargeMinor;
   const extrasTotalMinor = parkingChargeMinor + timeExtensionChargeMinor;
   const totalMinor = accommodationSubtotalMinor + extrasTotalMinor;
-  const downPaymentMinor = Math.min(100_000, totalMinor);
+  const downPaymentMinor = null;
   const earlyCheckInTime = earlyCheckInHours
     ? `${String(14 - earlyCheckInHours).padStart(2, "0")}:00`
     : null;
