@@ -2421,9 +2421,7 @@ body:has(.pwa-site) .guest-menu-toggle { display:none; }
   isolation:isolate;
   background:radial-gradient(circle at 0 0,rgba(166,133,81,.12),transparent 35%),repeating-linear-gradient(30deg,rgba(104,110,74,.025) 0 1px,transparent 1px 12px),#fffcf5;
 }
-.pwa-hero-intro::before,.pwa-hero-intro::after { content:""; position:absolute; z-index:-1; width:125px; height:210px; opacity:.24; background:radial-gradient(ellipse at 35% 18%,#567857 0 19%,transparent 20%),radial-gradient(ellipse at 65% 43%,#567857 0 20%,transparent 21%),radial-gradient(ellipse at 25% 70%,#567857 0 18%,transparent 19%); transform:rotate(-25deg); }
-.pwa-hero-intro::before { right:-50px; top:-85px; }
-.pwa-hero-intro::after { left:-70px; bottom:-115px; transform:rotate(125deg); }
+.pwa-botanical-corner { position:absolute; z-index:2; top:-12px; right:-12px; width:clamp(135px,15vw,185px); height:auto; opacity:.8; pointer-events:none; filter:drop-shadow(0 3px 6px rgba(0,0,0,.14)); }
 .pwa-hero-top,.pwa-hero-copy { position:static; max-width:none; }
 .pwa-hero-top { display:block; }
 .pwa-hero-top span,.pwa-hero-top strong { display:inline-flex; align-items:center; padding:0; background:transparent; color:#76502a; font-size:10px; letter-spacing:.16em; }
@@ -2480,6 +2478,7 @@ body:has(.pwa-site) .booking-step-actions>button:not(.booking-step-back),body:ha
   .pwa-status { margin-top:7px; }
   .pwa-hero { grid-template-columns:1fr; grid-template-rows:auto 300px auto; border-radius:6px 42px 6px 6px; }
   .pwa-hero-intro { min-height:335px; padding:30px 25px 22px; }
+  .pwa-botanical-corner { top:-8px; right:-8px; width:115px; opacity:.76; }
   .pwa-hero-top span,.pwa-hero-top strong { font-size:8px; }
   .pwa-hero-copy { margin:20px 0; }
   .pwa-hero-copy small { font-size:8px; }

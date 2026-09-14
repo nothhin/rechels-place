@@ -52,6 +52,7 @@ export default function Home() {
         </div>
         <div className="pwa-hero-photo">
           <Image src="/images/rechel-s-place/airbnb-living-room.jpg" alt="Rechel's Place living room with sofa, TV, and city view" fill priority sizes="(max-width: 700px) 100vw, 60vw" />
+          <Image className="pwa-botanical-corner" src="/images/rechel-s-place/botanical-corner.svg" alt="" aria-hidden="true" width={240} height={270} />
           <div className="pwa-photo-caption"><span>01 / THE SPACE</span><strong>Come in. Stay awhile.</strong></div>
         </div>
         <div className="pwa-facts">{quickFacts.map(([icon, label]) => <div key={label}><span><UiIcon name={icon} size={22} /></span><strong>{label}</strong></div>)}</div>
