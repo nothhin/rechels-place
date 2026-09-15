@@ -14,6 +14,11 @@ import styles from "../admin.module.css";
 
 const initialState: PriceActionState = { status: "idle" };
 const decimalPattern = /^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/;
+const managedPriceKeys = new Set<PricingSetting["key"]>([
+  "whole_condo_nightly_rate",
+  "refundable_security_deposit",
+  "down_payment_percent",
+]);
 
 function inputValue(setting: PricingSetting) {
   if (setting.valueType === "percentage") return String(setting.percentage ?? 0);
@@ -91,7 +96,7 @@ export default function PricingManagementClient({
         {state.status === "error" ? <span className={styles.pricingError} role="alert">{state.message}</span> : null}
       </div>
       <div className={styles.pricingGrid}>
-        {pricing.settings.map((setting) => <article className={styles.pricingCard} key={setting.key}>
+        {pricing.settings.filter((setting) => managedPriceKeys.has(setting.key)).map((setting) => <article className={styles.pricingCard} key={setting.key}>
           <div className={styles.pricingCardHeader}><div><p className={styles.pricingKey}>{setting.key}</p><h3>{setting.displayName}</h3></div><span className={styles.pricingRevision}>v{setting.revision}</span></div>
           <p className={styles.pricingDescription}>{setting.description}</p>
           <p className={styles.pricingValue}>{displayValue(setting)}</p>
@@ -108,7 +113,7 @@ export default function PricingManagementClient({
 
     <section className={styles.pricingHistory} aria-labelledby="pricing-history-heading">
       <div><p className="eyebrow">Audit trail</p><h2 id="pricing-history-heading">Price history</h2><p>Every successful change records the previous value, new value, administrator, and optional reason.</p></div>
-      {history.length ? <div className={styles.pricingHistoryList}>{history.map((entry) => <article className={styles.pricingHistoryRow} key={entry.id}>
+      {history.some((entry) => managedPriceKeys.has(entry.key)) ? <div className={styles.pricingHistoryList}>{history.filter((entry) => managedPriceKeys.has(entry.key)).map((entry) => <article className={styles.pricingHistoryRow} key={entry.id}>
         <div><strong>{entry.displayName}</strong><small>{formatDate(entry.changedAt)} · {entry.changedBy ?? "Unknown administrator"}</small></div>
         <div className={styles.pricingHistoryChange}><span>{historyValue(entry, false)}</span><b aria-hidden="true">→</b><strong>{historyValue(entry, true)}</strong></div>
         {entry.reason ? <p>{entry.reason}</p> : null}
