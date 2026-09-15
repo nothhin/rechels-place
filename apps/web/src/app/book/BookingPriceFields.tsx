@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatPhpMinor, formatPricingPercent, type RechelsPricingConfig } from "@uppadar-hollie/shared/pricing";
 import BookingPriceReceipt from "../BookingPriceReceipt";
 import styles from "./book.module.css";
 
@@ -8,12 +9,14 @@ type BookingPriceFieldsProps = {
   initialCheckIn?: string;
   initialCheckOut?: string;
   initialGuests?: string;
+  pricing?: RechelsPricingConfig | null;
 };
 
 export default function BookingPriceFields({
   initialCheckIn = "",
   initialCheckOut = "",
   initialGuests = "2",
+  pricing = null,
 }: BookingPriceFieldsProps) {
   const [checkIn, setCheckIn] = useState(initialCheckIn);
   const [checkOut, setCheckOut] = useState(initialCheckOut);
@@ -42,7 +45,7 @@ export default function BookingPriceFields({
             <strong>Entire two-bedroom condo</strong>
             <small>2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests</small>
           </span>
-          <b>₱4,500/night</b>
+          <b>{pricing ? formatPhpMinor(pricing.wholeCondoNightlyRateMinor) : "Current rate"}/night</b>
         </div>
       </fieldset>
       <label>
@@ -56,8 +59,8 @@ export default function BookingPriceFields({
         </select>
         <small>Current Airbnb listing capacity: up to 6 guests.</small>
       </label>
-      <p className={styles.note}>Current rate: ₱4,500/night. A 50% down payment secures the accommodation balance, and the separate ₱1,000 refundable security deposit is due upon check-in on that day. Free street parking is listed on Airbnb; ask Rechel about arrival details when you send your request.</p>
-      <BookingPriceReceipt checkIn={checkIn} checkOut={checkOut} guests={guests} bedroomChoice="both_bedrooms" parkingType="none" />
+      <p className={styles.note}>Current rate: {pricing ? formatPhpMinor(pricing.wholeCondoNightlyRateMinor) : "the configured rate"}/night. A {pricing ? formatPricingPercent(pricing.downPaymentPercent) : "configured"} down payment secures the accommodation balance, and the separate {pricing ? formatPhpMinor(pricing.refundableSecurityDepositMinor) : "refundable security deposit"} is due upon check-in on that day. Free street parking is listed on Airbnb; ask Rechel about arrival details when you send your request.</p>
+      <BookingPriceReceipt checkIn={checkIn} checkOut={checkOut} guests={guests} bedroomChoice="both_bedrooms" parkingType="none" pricing={pricing} />
     </>
   );
 }

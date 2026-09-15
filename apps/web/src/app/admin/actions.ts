@@ -1,14 +1,17 @@
 "use server";
 
-import { createDatabase, auditLog, roomTypes, rooms } from "@uppadar-hollie/db";
+import { createDatabase, auditLog, rooms } from "@uppadar-hollie/db";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { bookingRequestStatusSchema, transitionBookingRequestStatus } from "@uppadar-hollie/shared/booking-lifecycle";
+import { pricingKeySchema, type PricingSetting } from "@uppadar-hollie/shared/pricing";
 import { requireStaff } from "@/lib/server/admin-auth";
 import { parseDatabaseEnvironment } from "@/lib/server/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getStaffPricing } from "@/lib/server/pricing";
+import { parsePriceInputMinor, parsePriceInputPercentage } from "@/lib/pricing-input";
 import {
   createDepositToken,
   hashDepositToken,
@@ -26,11 +29,10 @@ export type BalanceActionState = {
 };
 export type OperationActionState = BalanceActionState;
 
-const roomTypeSchema = z.object({
-  id: z.string().uuid(),
-  rate: z.coerce.number().int().min(0).max(1_000_000),
-  status: z.enum(["draft", "published", "archived"]),
-});
+export type PriceActionState = {
+  status: "idle" | "success" | "error";
+  message?: string;
+};
 
 const roomSchema = z.object({
   roomNumber: z.string().trim().min(1).max(30),
@@ -70,45 +72,86 @@ export async function signOut() {
   redirect("/admin/login");
 }
 
-export async function updateRoomType(formData: FormData) {
-  const staff = await requireStaff(["manager", "admin"]);
-  const parsed = roomTypeSchema.safeParse({
-    id: formData.get("id"),
-    rate: formData.get("rate"),
-    status: formData.get("status"),
-  });
-  if (!parsed.success)
-    redirect("/admin?error=invalid-room-template#room-templates");
-  const database = createDatabase(databaseUrl());
-  const requestId = crypto.randomUUID();
-  try {
-    await database.db.transaction(async (tx) => {
-      await tx
-        .update(roomTypes)
-        .set({
-          baseNightlyRateMinor: parsed.data.rate * 100,
-          status: parsed.data.status,
-          updatedAt: new Date(),
-        })
-        .where(eq(roomTypes.id, parsed.data.id));
-      await tx
-        .insert(auditLog)
-        .values({
-          actorId: staff.id,
-          actorType: "staff",
-          action: "room_type.updated",
-          entityType: "room_type",
-          entityId: parsed.data.id,
-          requestId,
-          redactedMetadata: { status: parsed.data.status },
-        });
-    });
-  } finally {
-    await database.close();
+export async function updatePriceSetting(
+  _previous: PriceActionState,
+  formData: FormData,
+): Promise<PriceActionState> {
+  await requireStaff(["manager", "admin"]);
+
+  const keyResult = pricingKeySchema.safeParse(formData.get("priceKey"));
+  const expectedRevision = Number(formData.get("expectedRevision"));
+  const reasonValue = formData.get("reason");
+  const reason = typeof reasonValue === "string" ? reasonValue.trim() : "";
+  if (
+    !keyResult.success ||
+    !Number.isSafeInteger(expectedRevision) ||
+    expectedRevision < 1 ||
+    formData.get("confirm") !== "on"
+  ) {
+    return { status: "error", message: "Confirm the price change and try again." };
   }
+  if (reason.length > 500) {
+    return { status: "error", message: "The reason must be 500 characters or fewer." };
+  }
+
+  const staffPricing = await getStaffPricing();
+  const setting = staffPricing?.pricing.settings.find(
+    (candidate) => candidate.key === keyResult.data,
+  ) as PricingSetting | undefined;
+  if (!setting) {
+    return { status: "error", message: "That price setting is not available." };
+  }
+
+  let newAmountMinor: number | null = null;
+  let newPercentageBasisPoints: number | null = null;
+  if (setting.valueType === "amount") {
+    newAmountMinor = parsePriceInputMinor(formData.get("value"));
+    if (
+      newAmountMinor === null ||
+      (setting.maximumAmountMinor !== null && newAmountMinor > setting.maximumAmountMinor)
+    ) {
+      return { status: "error", message: "Enter a valid non-negative PHP amount with up to two decimals." };
+    }
+  } else {
+    newPercentageBasisPoints = parsePriceInputPercentage(formData.get("value"));
+    if (
+      newPercentageBasisPoints === null ||
+      (setting.maximumPercentage !== null && newPercentageBasisPoints / 100 > setting.maximumPercentage)
+    ) {
+      return { status: "error", message: "Enter a valid percentage from 0 to the configured maximum." };
+    }
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("staff_update_snowaz_price", {
+    price_key: keyResult.data,
+    new_amount_minor: newAmountMinor,
+    new_percentage_basis_points: newPercentageBasisPoints,
+    expected_revision: expectedRevision,
+    reason: reason || null,
+  });
+  const updateResult = data && typeof data === "object" && !Array.isArray(data)
+    ? data as { status?: string; code?: string }
+    : null;
+  if (error || !updateResult || updateResult.status === "error") {
+    console.error("[pricing] price update failed", {
+      code: error?.code ?? updateResult?.code ?? "unknown",
+      name: error?.name ?? "unknown",
+    });
+    return {
+      status: "error",
+      message: error?.message?.includes("another admin") || updateResult?.code === "price_revision_conflict"
+        ? "This price changed in another admin session. Reload the page and review the latest value."
+        : "The price could not be updated. Please reload and try again.",
+    };
+  }
+
+  revalidatePath("/");
   revalidatePath("/admin");
-  revalidatePath("/rooms");
-  redirect("/admin?saved=room-template#room-templates");
+  revalidatePath("/admin/pricing");
+  revalidatePath("/admin/confirmed");
+  revalidatePath("/admin/operations");
+  return { status: "success", message: `${setting.displayName} was updated.` };
 }
 
 export async function addPhysicalRoom(formData: FormData) {
@@ -496,11 +539,13 @@ export async function updateBookingOperations(
   if (error || !data)
     return {
       status: "error",
-      message: error?.message.includes("unavailable")
-        ? "Those dates conflict with a booking or maintenance block."
-        : error?.message.includes("below payments")
-          ? "The repriced total cannot be lower than payments already received."
-          : "The booking could not be updated.",
+      message: error?.message.includes("price snapshot")
+        ? "The agreed price snapshot is protected. Change only operational details that do not alter the stay total."
+        : error?.message.includes("unavailable")
+          ? "Those dates conflict with a booking or maintenance block."
+          : error?.message.includes("below payments")
+            ? "The repriced total cannot be lower than payments already received."
+            : "The booking could not be updated.",
     };
   revalidatePath("/admin");
   revalidatePath("/admin/operations");
@@ -508,7 +553,7 @@ export async function updateBookingOperations(
   return {
     status: "success",
     message:
-      "Booking updated, repriced, audited, and queued for guest notification.",
+      "Booking operations updated, audited, and queued for guest notification. The saved price snapshot was preserved.",
   };
 }
 

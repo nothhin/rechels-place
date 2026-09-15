@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { RechelsPricingConfig } from "@uppadar-hollie/shared/pricing";
 import BookingModal from "./BookingModal";
 
 type Range = { checkIn: string; checkOut: string; status: "pending" | "booked" | "unavailable"; label?: string | null };
@@ -10,7 +11,7 @@ const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const iso = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 const addDays = (date: Date, days: number) => new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
 
-export default function AvailabilityCalendar() {
+export default function AvailabilityCalendar({ pricing }: { pricing: RechelsPricingConfig | null }) {
   const today = useMemo(() => new Date(), []);
   const [month, setMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [ranges, setRanges] = useState<Range[]>([]);
@@ -104,5 +105,5 @@ export default function AvailabilityCalendar() {
       })}
     </div>
     <div className="calendar-legend"><span data-status="open">Open · select to book</span><span data-status="pending">Pending</span><span data-status="booked">Booked</span><span data-status="unavailable">Unavailable reason</span></div>
-  </div>{selectedStay ? <BookingModal {...selectedStay} onClose={() => setSelectedStay(null)} /> : null}</>;
+  </div>{selectedStay ? <BookingModal {...selectedStay} pricing={pricing} onClose={() => setSelectedStay(null)} /> : null}</>;
 }

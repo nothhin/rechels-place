@@ -30,6 +30,16 @@ const rechelPaymentRulesPath = fileURLToPath(new URL("../../../supabase/migratio
 const rechelPaymentRules = readFileSync(rechelPaymentRulesPath, "utf8");
 const rechelAdminStatusPath = fileURLToPath(new URL("../../../supabase/migrations/20260914180000_admin_booking_status_actions.sql", import.meta.url));
 const rechelAdminStatus = readFileSync(rechelAdminStatusPath, "utf8");
+const centralizedPricingPath = fileURLToPath(new URL("../../../supabase/migrations/20260914200000_centralized_price_management.sql", import.meta.url));
+const centralizedPricing = readFileSync(centralizedPricingPath, "utf8");
+const snapshotProtectionPath = fileURLToPath(new URL("../../../supabase/migrations/20260915000000_preserve_booking_price_snapshots.sql", import.meta.url));
+const snapshotProtection = readFileSync(snapshotProtectionPath, "utf8");
+const manipulatedTotalsPath = fileURLToPath(new URL("../../../supabase/migrations/20260915010000_reject_manipulated_booking_totals.sql", import.meta.url));
+const manipulatedTotals = readFileSync(manipulatedTotalsPath, "utf8");
+const pendingSnapshotPath = fileURLToPath(new URL("../../../supabase/migrations/20260915020000_preserve_pending_price_snapshots.sql", import.meta.url));
+const pendingSnapshot = readFileSync(pendingSnapshotPath, "utf8");
+const priceFailureAuditPath = fileURLToPath(new URL("../../../supabase/migrations/20260915030000_price_update_failure_audit.sql", import.meta.url));
+const priceFailureAudit = readFileSync(priceFailureAuditPath, "utf8");
 
 describe("initial database migration", () => {
   it("enforces a single property settings row", () => {
@@ -222,5 +232,43 @@ describe("Rechel's Place admin status actions", () => {
     expect(rechelAdminStatus).toContain("return coalesce(current_status = next_status, false)");
     expect(rechelAdminStatus).toContain("revoke all on function public.staff_update_snowaz_booking_status(uuid, text)");
     expect(rechelAdminStatus).toContain("to authenticated");
+  });
+});
+
+describe("Rechel's Place centralized pricing", () => {
+  it("stores the active price settings behind a controlled RPC", () => {
+    expect(centralizedPricing).toContain("create table if not exists public.snowaz_price_settings");
+    expect(centralizedPricing).toContain("grant execute on function public.get_snowaz_public_pricing() to anon, authenticated");
+    expect(centralizedPricing).toContain("grant execute on function public.staff_update_snowaz_price(text,bigint,integer,bigint,text) to authenticated");
+  });
+
+  it("captures successful changes in an append-only history", () => {
+    expect(centralizedPricing).toContain("create table if not exists public.snowaz_price_history");
+    expect(centralizedPricing).toContain("insert into public.snowaz_price_history");
+    expect(centralizedPricing).toContain("p_expected_revision");
+  });
+
+  it("protects existing booking snapshots from operational edits", () => {
+    expect(snapshotProtection).toContain("booking price snapshot is protected");
+    expect(snapshotProtection).toContain("priceSnapshotPreserved");
+    expect(snapshotProtection).not.toContain("private.snowaz_booking_price(");
+  });
+
+  it("rejects stale or manipulated client totals before insertion", () => {
+    expect(manipulatedTotals).toContain("client_total_minor <> calculation.total_minor");
+    expect(manipulatedTotals).toContain("pricing_changed");
+    expect(manipulatedTotals).toContain("private.snowaz_public_pricing_payload()");
+  });
+
+  it("keeps pending guest-count corrections on the saved price snapshot", () => {
+    expect(pendingSnapshot).toContain("guest_count = guests");
+    expect(pendingSnapshot).toContain("submitted price is independent of guest count");
+    expect(pendingSnapshot).not.toContain("private.snowaz_booking_price(");
+  });
+
+  it("audits failed and concurrent price update attempts", () => {
+    expect(priceFailureAudit).toContain("pricing.update_failed");
+    expect(priceFailureAudit).toContain("price_revision_conflict");
+    expect(priceFailureAudit).toContain("grant execute on function public.staff_update_snowaz_price");
   });
 });

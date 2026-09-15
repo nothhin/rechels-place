@@ -1,12 +1,21 @@
 "use client";
 
-import { useActionState, useEffect, useId, useRef, useState } from "react";
+import { useActionState, useEffect, useId, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   submitBookingRequestInline,
   type BookingActionState,
 } from "./book/actions";
+import {
+  calculateSnowazBookingReceipt,
+  createRechelsPlacePricingStrategy,
+} from "@uppadar-hollie/shared/booking";
+import {
+  formatPhpMinor,
+  formatPricingPercent,
+  type RechelsPricingConfig,
+} from "@uppadar-hollie/shared/pricing";
 import { propertyLogoSrc, propertyProfile } from "@/lib/property";
 import { showError, showSuccess } from "@/lib/sweetalert";
 import { RememberBooking, rememberBooking } from "./BookingMemory";
@@ -16,6 +25,7 @@ import BookingPriceReceipt from "./BookingPriceReceipt";
 type BookingModalProps = {
   checkIn: string;
   checkOut: string;
+  pricing: RechelsPricingConfig | null;
   onClose: () => void;
 };
 const initialState: BookingActionState = { status: "idle" };
@@ -23,6 +33,7 @@ const initialState: BookingActionState = { status: "idle" };
 export default function BookingModal({
   checkIn,
   checkOut,
+  pricing,
   onClose,
 }: BookingModalProps) {
   const [state, action, pending] = useActionState(
@@ -42,8 +53,39 @@ export default function BookingModal({
   const [earlyCheckInHours] = useState(0);
   const [lateCheckoutHours] = useState(0);
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [reviewedPricingVersion, setReviewedPricingVersion] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const availabilityNotified = useRef(false);
+  const livePricing = state.status === "stale" && state.pricing ? state.pricing : pricing;
+  const priceReviewRequired = state.status === "stale";
+  const priceReviewed = livePricing?.version === reviewedPricingVersion;
+  const visibleStep = state.status === "stale" ? 3 : step;
+  const clientReceipt = useMemo(() => {
+    if (!livePricing) return null;
+    try {
+      return calculateSnowazBookingReceipt(
+        selectedCheckIn,
+        selectedCheckOut,
+        guests,
+        parkingType,
+        bedroomChoice,
+        earlyCheckInHours,
+        lateCheckoutHours,
+        createRechelsPlacePricingStrategy(livePricing),
+      );
+    } catch {
+      return null;
+    }
+  }, [
+    bedroomChoice,
+    earlyCheckInHours,
+    guests,
+    lateCheckoutHours,
+    livePricing,
+    parkingType,
+    selectedCheckIn,
+    selectedCheckOut,
+  ]);
 
   const validateStep = (currentStep: 1 | 2) => {
     const form = formRef.current;
@@ -85,7 +127,7 @@ export default function BookingModal({
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     stepHeadingRef.current?.focus();
-  }, [step]);
+  }, [visibleStep]);
 
   useEffect(() => {
     if (state.status === "success" && !availabilityNotified.current) {
@@ -155,20 +197,20 @@ export default function BookingModal({
           </button>
         </header>
         {state.status !== "success" ? (
-          <div className="booking-modal-progress" aria-label={`Booking progress, step ${step} of 3`}>
+          <div className="booking-modal-progress" aria-label={`Booking progress, step ${visibleStep} of 3`}>
             <div>
-              <b>{step}</b>
-              <strong>{step === 1 ? "Choose your stay" : step === 2 ? "Guest details" : "Review request"}</strong>
-              <small>Step {step} of 3</small>
+              <b>{visibleStep}</b>
+              <strong>{visibleStep === 1 ? "Choose your stay" : visibleStep === 2 ? "Guest details" : "Review request"}</strong>
+              <small>Step {visibleStep} of 3</small>
             </div>
             <ol>
               {(["Select stay", "Guest details", "Review"] as const).map((label, index) => (
-                <li className={index + 1 === step ? "active" : index + 1 < step ? "complete" : undefined} key={label}>
-                  <button type="button" disabled={index + 1 >= step} onClick={() => setStep((index + 1) as 1 | 2 | 3)}>{index + 1}. {label}</button>
+                <li className={index + 1 === visibleStep ? "active" : index + 1 < visibleStep ? "complete" : undefined} key={label}>
+                  <button type="button" disabled={index + 1 >= visibleStep || state.status === "stale"} onClick={() => setStep((index + 1) as 1 | 2 | 3)}>{index + 1}. {label}</button>
                 </li>
               ))}
             </ol>
-            <div className="booking-modal-progress-track" aria-hidden="true"><span style={{ width: `${(step / 3) * 100}%` }} /></div>
+            <div className="booking-modal-progress-track" aria-hidden="true"><span style={{ width: `${(visibleStep / 3) * 100}%` }} /></div>
           </div>
         ) : null}
         {state.status === "success" ? (
@@ -187,8 +229,7 @@ export default function BookingModal({
             <p>
               Your reference is <strong>{state.bookingReference}</strong>. Your
               stay is not confirmed yet. Review the private payment page for
-              the 50% down payment; the ₱1,000 refundable security deposit is
-              due separately upon check-in on that day.
+              the {livePricing ? formatPricingPercent(livePricing.downPaymentPercent) : "configured"} down payment; the {livePricing ? formatPhpMinor(livePricing.refundableSecurityDepositMinor) : "refundable security deposit"} is due separately upon check-in on that day.
             </p>
             <a
               className="booking-deposit-link"
@@ -206,7 +247,7 @@ export default function BookingModal({
         ) : (
           <>
             <div className="booking-modal-scroll" ref={scrollRef}>
-              {step === 1 ? <>
+              {visibleStep === 1 ? <>
                 <div className="booking-modal-heading">
                   <p className="eyebrow">
                     <UiIcon name="check" size={12} /> Live availability · Direct
@@ -215,8 +256,7 @@ export default function BookingModal({
                   <h2 id={titleId} ref={stepHeadingRef} tabIndex={-1}>Reserve Your Sanctuary</h2>
                   <p>
                     Choose your preferred dates and send your stay details. The
-                    current accommodation rate is ₱4,500 per night, subject to
-                    the host confirming availability.
+                    current accommodation rate is {livePricing ? formatPhpMinor(livePricing.wholeCondoNightlyRateMinor) : "the configured rate"} per night, subject to the host confirming availability.
                   </p>
                 </div>
                 <div className="booking-selected-dates" role="status">
@@ -226,11 +266,11 @@ export default function BookingModal({
                     <small>{selectedCheckIn && selectedCheckOut ? `${new Date(`${selectedCheckIn}T00:00:00`).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })} – ${new Date(`${selectedCheckOut}T00:00:00`).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })}` : "Select a check-in and check-out date in the first step."}</small>
                   </div>
                 </div>
-              </> : <h2 className="booking-step-content-heading" id={titleId} ref={stepHeadingRef} tabIndex={-1}>{step === 2 ? "Guest details" : "Review request"}</h2>}
+              </> : <h2 className="booking-step-content-heading" id={titleId} ref={stepHeadingRef} tabIndex={-1}>{visibleStep === 2 ? "Guest details" : "Review request"}</h2>}
               <form
                 action={action}
                 ref={formRef}
-                onSubmit={() => { if (idempotencyInputRef.current && !idempotencyInputRef.current.value) idempotencyInputRef.current.value = crypto.randomUUID(); }}
+                onSubmit={() => { if (idempotencyInputRef.current && !idempotencyInputRef.current.value) idempotencyInputRef.current.value = crypto.randomUUID(); if (priceReviewRequired) setStep(3); }}
                 className="booking-modal-form booking-stitch-form"
               >
                 {state.status === "error" ? (
@@ -254,11 +294,13 @@ export default function BookingModal({
                 <input type="hidden" name="parkingType" value={parkingType} />
                 <input type="hidden" name="earlyCheckInHours" value={earlyCheckInHours} />
                 <input type="hidden" name="lateCheckoutHours" value={lateCheckoutHours} />
+                <input type="hidden" name="pricingVersion" value={livePricing?.version ?? ""} />
+                <input type="hidden" name="clientTotalMinor" value={clientReceipt?.totalMinor ?? ""} />
                 <label className="booking-honeypot">
                   Website
                   <input name="website" tabIndex={-1} autoComplete="off" />
                 </label>
-                <div data-booking-step="1" className={step === 1 ? "booking-step" : "booking-step booking-step-hidden"}>
+                <div data-booking-step="1" className={visibleStep === 1 ? "booking-step" : "booking-step booking-step-hidden"}>
                 <section className="booking-suite-section">
                   <span>CHOOSE YOUR STAY</span>
                   <div className="booking-room-options">
@@ -267,7 +309,7 @@ export default function BookingModal({
                         <strong>Entire two-bedroom condo</strong>
                         <small>2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests</small>
                       </span>
-                      <b>₱4,500/night</b>
+                      <b>{livePricing ? formatPhpMinor(livePricing.wholeCondoNightlyRateMinor) : "Current rate"}/night</b>
                     </div>
                   </div>
                 </section>
@@ -305,7 +347,7 @@ export default function BookingModal({
                   </div>
                 </section>
                 </div>
-                <div data-booking-step="2" className={step === 2 ? "booking-step" : "booking-step booking-step-hidden"}>
+                <div data-booking-step="2" className={visibleStep === 2 ? "booking-step" : "booking-step booking-step-hidden"}>
                 <section className="booking-stay-details">
                   <h3>
                     <UiIcon name="sparkles" size={17} /> Stay Details
@@ -406,8 +448,24 @@ export default function BookingModal({
                   </label>
                 </section>
                 </div>
-                <div data-booking-step="3" className={step === 3 ? "booking-step" : "booking-step booking-step-hidden"}>
+                <div data-booking-step="3" className={visibleStep === 3 ? "booking-step" : "booking-step booking-step-hidden"}>
                 <>
+                  {priceReviewRequired ? (
+                    <div className="booking-price-change" role="alert">
+                      <strong>Rates changed while you were booking.</strong>
+                      <p>
+                        Your previous estimate was {state.previousTotalMinor !== undefined ? formatPhpMinor(state.previousTotalMinor) : "the earlier amount"}; the updated estimate is {state.currentTotalMinor !== undefined ? formatPhpMinor(state.currentTotalMinor) : clientReceipt ? formatPhpMinor(clientReceipt.totalMinor) : "the current amount"}.
+                      </p>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={priceReviewed}
+                          onChange={(event) => setReviewedPricingVersion(event.target.checked ? livePricing?.version ?? null : null)}
+                        />
+                        <span>I reviewed the updated total and want to continue.</span>
+                      </label>
+                    </div>
+                  ) : null}
                   <BookingPriceReceipt
                     checkIn={selectedCheckIn}
                     checkOut={selectedCheckOut}
@@ -416,16 +474,14 @@ export default function BookingModal({
                     parkingType={parkingType}
                     earlyCheckInHours={earlyCheckInHours}
                     lateCheckoutHours={lateCheckoutHours}
+                    pricing={livePricing}
                   />
                   <div className="booking-rate-note">
                     <UiIcon name="check" size={18} />
                     <div>
-                      <strong>Current rate: ₱4,500/night</strong>
+                      <strong>Current rate: {livePricing ? formatPhpMinor(livePricing.wholeCondoNightlyRateMinor) : "Unavailable"}/night</strong>
                       <small>
-                        No payment is collected in this form. A 50% down
-                        payment secures the accommodation balance, while the
-                        separate ₱1,000 refundable security deposit is due upon
-                        check-in on that day.
+                        No payment is collected in this form. A {livePricing ? formatPricingPercent(livePricing.downPaymentPercent) : "configured"} down payment secures the accommodation balance, while the separate {livePricing ? formatPhpMinor(livePricing.refundableSecurityDepositMinor) : "refundable security deposit"} is due upon check-in on that day.
                       </small>
                     </div>
                   </div>
@@ -460,9 +516,9 @@ export default function BookingModal({
                   </div>
                 </>
                 </div>
-                <div className={`booking-step-actions${step > 1 ? " has-back" : ""}`}>
-                  {step > 1 ? <button className="booking-step-back" type="button" onClick={() => setStep((value) => (value - 1) as 1 | 2)}>Back</button> : null}
-                  {step < 3 ? <button className="booking-step-next" type="button" onClick={continueToNextStep}>Continue <UiIcon name="arrow-right" size={16} /></button> : <button className="booking-modal-submit" type="submit" disabled={pending}><UiIcon name="message" size={17} />{pending ? "Sending request…" : "Submit direct request"}</button>}
+                <div className={`booking-step-actions${visibleStep > 1 ? " has-back" : ""}`}>
+                  {visibleStep > 1 && state.status !== "stale" ? <button className="booking-step-back" type="button" onClick={() => setStep((value) => (value - 1) as 1 | 2)}>Back</button> : null}
+                  {visibleStep < 3 ? <button className="booking-step-next" type="button" onClick={continueToNextStep}>Continue <UiIcon name="arrow-right" size={16} /></button> : <button className="booking-modal-submit" type="submit" disabled={pending || !livePricing || (priceReviewRequired && !priceReviewed)}><UiIcon name="message" size={17} />{pending ? "Sending request…" : priceReviewRequired && !priceReviewed ? "Review updated total" : "Submit direct request"}</button>}
                 </div>
               </form>
             </div>

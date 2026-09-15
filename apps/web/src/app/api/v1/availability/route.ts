@@ -1,5 +1,7 @@
 import { createDatabase, findAvailableRoomTypes } from "@uppadar-hollie/db";
+import { createClient } from "@supabase/supabase-js";
 import { availabilitySearchSchema, calculateStayTotalMinor, stayNights } from "@uppadar-hollie/shared/booking";
+import { pricingConfigFromPayload } from "@uppadar-hollie/shared/pricing";
 import { parseDatabaseEnvironment } from "../../../../lib/server/env";
 
 export const dynamic = "force-dynamic";
@@ -36,15 +38,39 @@ export async function GET(request: Request) {
   try {
     const nights = stayNights(parsed.data.checkIn, parsed.data.checkOut);
     const roomTypes = await findAvailableRoomTypes(database.db, parsed.data);
+    const pricingUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const pricingKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const pricingClient = pricingUrl && pricingKey
+      ? createClient(pricingUrl, pricingKey, { auth: { persistSession: false, autoRefreshToken: false } })
+      : null;
+    if (!pricingClient) throw new Error("Pricing configuration is unavailable.");
+    const { data: pricingPayload, error: pricingError } = await pricingClient.rpc("get_snowaz_public_pricing");
+    if (pricingError || !pricingPayload) throw new Error("Pricing configuration is unavailable.");
+    const pricing = pricingConfigFromPayload(pricingPayload);
+    const rateForSlug = (slug: string) => {
+      if (slug.includes("entire-condo")) return pricing.wholeCondoNightlyRateMinor;
+      if (slug.includes("master")) return pricing.masterBedroomNightlyRateMinor;
+      if (slug.includes("second")) return pricing.secondBedroomNightlyRateMinor;
+      return null;
+    };
+    const centralizedRoomTypes = roomTypes.map((roomType) => ({
+      ...roomType,
+      nightlyRateMinor: rateForSlug(roomType.slug),
+    }));
+    if (centralizedRoomTypes.some((roomType) => roomType.nightlyRateMinor === null)) {
+      throw new Error("A published room type has no centralized price.");
+    }
 
     return Response.json({
       requestId,
       data: {
         stay: { ...parsed.data, nights },
         currency: "PHP",
-        roomTypes: roomTypes.map((roomType) => ({
+        pricingVersion: pricing.version,
+        roomTypes: centralizedRoomTypes.map((roomType) => ({
           ...roomType,
-          stayTotalMinor: calculateStayTotalMinor(roomType.nightlyRateMinor, nights),
+          nightlyRateMinor: roomType.nightlyRateMinor as number,
+          stayTotalMinor: calculateStayTotalMinor(roomType.nightlyRateMinor as number, nights),
         })),
       },
     }, { headers: noStoreHeaders });

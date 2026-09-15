@@ -13,6 +13,7 @@ const navigation = [
   { label: "Stay calendar", href: "/admin#calendar", id: "calendar" },
   { label: "Confirmed stays", href: "/admin/confirmed", id: "confirmed" },
   { label: "Housekeeping & finance", href: "/admin/operations", id: "operations" },
+  { label: "Price management", href: "/admin/pricing", id: "pricing" },
 ] as const;
 
 function useActiveSection() {
@@ -26,6 +27,7 @@ function useActiveSection() {
   }, [pathname]);
   if (pathname === "/admin/confirmed") return "confirmed";
   if (pathname === "/admin/operations") return "operations";
+  if (pathname === "/admin/pricing") return "pricing";
   return hash;
 }
 
@@ -63,7 +65,7 @@ export function AdminBottomNav({ className, activeClassName }: { className: stri
     { label: "Calendar", href: "/admin#calendar", id: "calendar", icon: "calendar" },
     { label: "Guests", href: "/admin#booking-requests", id: "booking-requests", icon: "users" },
     { label: "Operations", href: "/admin/operations", id: "operations", icon: "locks" },
-    { label: "More", href: "/admin/confirmed", id: "confirmed", icon: "menu" },
+    { label: "Pricing", href: "/admin/pricing", id: "pricing", icon: "menu" },
   ] as const;
   return <nav className={className} aria-label="Mobile host workspace">{items.map(item => <Link prefetch className={active === item.id ? activeClassName : undefined} href={item.href} key={item.id}><AdminNavIcon name={item.icon} /><small>{item.label}</small></Link>)}</nav>;
 }

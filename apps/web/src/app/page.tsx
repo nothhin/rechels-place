@@ -21,6 +21,8 @@ import {
   stayDetails,
   unavailableAmenities,
 } from "@/lib/property";
+import { getPublicPricing } from "@/lib/server/pricing";
+import { formatPhpMinor, formatPricingPercent } from "@uppadar-hollie/shared/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +33,11 @@ const quickFacts: ReadonlyArray<[IconName, string]> = [
   ["shower", "2.5 Baths"],
 ];
 
-export default function Home() {
+export default async function Home() {
+  const pricing = await getPublicPricing();
+  const nightlyRate = pricing ? formatPhpMinor(pricing.wholeCondoNightlyRateMinor) : "Current rate";
+  const securityDeposit = pricing ? formatPhpMinor(pricing.refundableSecurityDepositMinor) : "Current deposit";
+  const downPayment = pricing ? formatPricingPercent(pricing.downPaymentPercent) : "Configured";
   return (
     <main className="pwa-site" id="home">
       <header className="pwa-header">
@@ -54,7 +60,7 @@ export default function Home() {
           <Image className="pwa-botanical-corner" src="/images/rechel-s-place/botanical-corner.svg" alt="" aria-hidden="true" width={240} height={270} />
           <div className="pwa-hero-meta"><span><UiIcon name="pin" size={13} /> {propertyProfile.locationLabel}</span><strong>Entire condo</strong></div>
           <div className="pwa-hero-copy-main"><small>YOUR HOME AWAY FROM HOME</small><h1 id="hero-heading">A calm home base for your CDO days.</h1><p>{propertyProfile.tagline}</p></div>
-          <div className="pwa-hero-rate"><span>DIRECT BOOKING RATE</span><strong>₱4,500 <em>/ night</em></strong><small>50% down payment · ₱1,000 refundable deposit</small></div>
+          <div className="pwa-hero-rate"><span>DIRECT BOOKING RATE</span><strong>{nightlyRate} <em>/ night</em></strong><small>{downPayment} down payment · {securityDeposit} refundable deposit</small></div>
         </div>
         <HeroCarousel slides={heroImages} />
         <div className="pwa-facts">{quickFacts.map(([icon, label]) => <div key={label}><span><UiIcon name={icon} size={19} /></span><strong>{label}</strong></div>)}</div>
@@ -132,14 +138,14 @@ export default function Home() {
       </section>
 
       <section className="pwa-booking" id="availability" tabIndex={-1} aria-labelledby="availability-heading">
-        <div className="pwa-book-heading"><span>LIVE AVAILABILITY · DIRECT WITH HOST</span><h2 id="availability-heading">Reserve your stay.</h2><p>Choose your preferred dates and contact Rechel directly. The current accommodation rate is ₱4,500 per night; a 50% down payment secures the stay, and the separate ₱1,000 refundable security deposit is due upon check-in on that day.</p></div>
-        <div className="pwa-config-card"><span>STAY CONFIGURATION</span><article><div><strong>{propertyProfile.descriptor}</strong><small>{propertyProfile.maxGuests} guests · 2 bedrooms · {propertyProfile.bedLabel} · {propertyProfile.bathroomLabel} · Kitchen · Pool · Keypad</small></div><b>₱4,500/night</b></article><article><div><strong>Top guest favorite</strong><small>{propertyProfile.ratingLabel} from {propertyProfile.reviewCount} Airbnb reviews</small></div><b>Airbnb</b></article></div>
+        <div className="pwa-book-heading"><span>LIVE AVAILABILITY · DIRECT WITH HOST</span><h2 id="availability-heading">Reserve your stay.</h2><p>Choose your preferred dates and contact Rechel directly. The current accommodation rate is {nightlyRate} per night; a {downPayment} down payment secures the stay, and the separate {securityDeposit} refundable security deposit is due upon check-in on that day.</p></div>
+        <div className="pwa-config-card"><span>STAY CONFIGURATION</span><article><div><strong>{propertyProfile.descriptor}</strong><small>{propertyProfile.maxGuests} guests · 2 bedrooms · {propertyProfile.bedLabel} · {propertyProfile.bathroomLabel} · Kitchen · Pool · Keypad</small></div><b>{nightlyRate}/night</b></article><article><div><strong>Top guest favorite</strong><small>{propertyProfile.ratingLabel} from {propertyProfile.reviewCount} Airbnb reviews</small></div><b>Airbnb</b></article></div>
         <div className="pwa-booking-policy" aria-label="Booking payment terms">
-          <article><b>₱4,500</b><span>nightly rate</span></article>
-          <article><b>50%</b><span>down payment</span></article>
-          <article><b>₱1,000</b><span>refundable security deposit on check-in</span></article>
+          <article><b>{nightlyRate}</b><span>nightly rate</span></article>
+          <article><b>{downPayment}</b><span>down payment</span></article>
+          <article><b>{securityDeposit}</b><span>refundable security deposit on check-in</span></article>
         </div>
-        <AvailabilityCalendar />
+        <AvailabilityCalendar pricing={pricing} />
         <div className="pwa-returning"><strong>Already sent a request?</strong><SavedBookingLink /></div>
       </section>
 

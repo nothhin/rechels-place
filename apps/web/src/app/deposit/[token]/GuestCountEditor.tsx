@@ -2,7 +2,9 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { RechelsPricingConfig } from "@uppadar-hollie/shared/pricing";
 import BookingPriceReceipt from "../../BookingPriceReceipt";
+import type { BookingPriceSnapshot } from "../../BookingPriceReceipt";
 import { showError, showSuccess } from "@/lib/sweetalert";
 import { updatePendingGuestCount, type GuestCountState } from "./actions";
 import styles from "./deposit.module.css";
@@ -20,6 +22,8 @@ export function GuestCountEditor({
   customerPhone,
   bookingStatus,
   paymentStatus,
+  pricing,
+  bookingSnapshot,
 }: {
   token: string;
   checkIn: string;
@@ -35,10 +39,13 @@ export function GuestCountEditor({
   customerPhone: string;
   bookingStatus: string;
   paymentStatus: string;
+  pricing: RechelsPricingConfig | null;
+  bookingSnapshot: BookingPriceSnapshot;
 }) {
   const [guests, setGuests] = useState(Math.min(6, Math.max(1, initialGuests)));
   const router = useRouter();
   const [state, action, pending] = useActionState(updatePendingGuestCount, initialState);
+  const previewSnapshot = guests === initialGuests ? bookingSnapshot : undefined;
 
   useEffect(() => {
     if (state.status === "success") {
@@ -76,7 +83,7 @@ export function GuestCountEditor({
           <span>2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests</span>
           <span>Free street parking is listed on Airbnb. Ask Rechel to confirm building and arrival details.</span>
         </div>
-        <button disabled={pending}>{pending ? "Updating…" : "Update guests and total"}</button>
+        <button disabled={pending || guests === initialGuests}>{pending ? "Updating…" : guests === initialGuests ? "Choose a different guest count" : "Update guests and total"}</button>
       </form>
       <BookingPriceReceipt
         checkIn={checkIn}
@@ -90,6 +97,8 @@ export function GuestCountEditor({
         customerPhone={customerPhone}
         bookingStatus={bookingStatus}
         paymentStatus={paymentStatus}
+        pricing={pricing}
+        snapshot={previewSnapshot}
       />
       <small>Changes are allowed only before payment details or a receipt are submitted.</small>
     </section>

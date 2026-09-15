@@ -143,7 +143,7 @@ export default async function AdminDashboard({
             <Link href="#booking-requests"><span aria-hidden="true">＋</span><small>New enquiry</small></Link>
             <Link href="#calendar"><span aria-hidden="true">▣</span><small>Block dates</small></Link>
             <Link href="/admin/confirmed"><span aria-hidden="true">✓</span><small>Confirmed stays</small></Link>
-            <Link href="/admin/operations"><span aria-hidden="true">₱</span><small>Rate override</small></Link>
+            <Link href="/admin/pricing"><span aria-hidden="true">₱</span><small>Price management</small></Link>
           </section>
           <section className={styles.sanctuaryCard} aria-label="Property status">
             <div className={styles.sanctuaryHeader}><div><p className={styles.eyebrow}>Sanctuary status</p><h2>Avida Aspira Tower 1 · Two-bedroom condo</h2></div><span className={styles.statusPill}>LIVE</span></div>

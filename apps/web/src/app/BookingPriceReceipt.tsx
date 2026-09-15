@@ -3,8 +3,9 @@
 import Image from "next/image";
 import {
   calculateSnowazBookingReceipt,
-  RECHELS_PLACE_REFUNDABLE_SECURITY_DEPOSIT_MINOR,
+  createRechelsPlacePricingStrategy,
 } from "@uppadar-hollie/shared/booking";
+import { formatPricingPercent, type RechelsPricingConfig } from "@uppadar-hollie/shared/pricing";
 import { propertyLogoSrc } from "@/lib/property";
 
 const php = new Intl.NumberFormat("en-PH", {
@@ -29,7 +30,10 @@ type BookingPriceReceiptProps = {
   paymentStatus?: string;
   downPaymentMinor?: number;
   refundableSecurityDepositMinor?: number;
+  pricing?: RechelsPricingConfig | null;
+  snapshot?: ReturnType<typeof calculateSnowazBookingReceipt>;
 };
+export type BookingPriceSnapshot = ReturnType<typeof calculateSnowazBookingReceipt>;
 
 const bedroomLabels = {
   bedroom_1: "Legacy single-bedroom record",
@@ -53,20 +57,25 @@ export default function BookingPriceReceipt({
   paymentStatus,
   downPaymentMinor,
   refundableSecurityDepositMinor,
+  pricing,
+  snapshot,
 }: BookingPriceReceiptProps) {
-  let receipt: ReturnType<typeof calculateSnowazBookingReceipt> | null = null;
-  try {
-    receipt = calculateSnowazBookingReceipt(
-      checkIn,
-      checkOut,
-      guests,
-      parkingType,
-      bedroomChoice,
-      earlyCheckInHours,
-      lateCheckoutHours,
-    );
-  } catch {
-    // The form fields provide their own validation while the receipt waits for valid values.
+  let receipt: ReturnType<typeof calculateSnowazBookingReceipt> | null = snapshot ?? null;
+  if (!receipt && pricing) {
+    try {
+      receipt = calculateSnowazBookingReceipt(
+        checkIn,
+        checkOut,
+        guests,
+        parkingType,
+        bedroomChoice,
+        earlyCheckInHours,
+        lateCheckoutHours,
+        createRechelsPlacePricingStrategy(pricing),
+      );
+    } catch {
+      // The form fields provide their own validation while the receipt waits for valid values.
+    }
   }
 
   if (!receipt)
@@ -77,10 +86,22 @@ export default function BookingPriceReceipt({
       >
         <strong>Digital booking receipt</strong>
         <p>
-          Choose valid stay dates and a guest count to calculate your payment.
+          {pricing
+            ? "Choose valid stay dates and a guest count to calculate your payment."
+            : "Live pricing is temporarily unavailable. Please try again shortly."}
         </p>
       </aside>
     );
+
+  const displayDownPaymentMinor = downPaymentMinor ?? receipt.downPaymentMinor;
+  const displaySecurityDepositMinor =
+    refundableSecurityDepositMinor ?? receipt.refundableSecurityDepositMinor;
+  const downPaymentPercent =
+    receipt.downPaymentPercent ??
+    (receipt.totalMinor > 0
+      ? (displayDownPaymentMinor / receipt.totalMinor) * 100
+      : 0);
+  const downPaymentLabel = `${formatPricingPercent(downPaymentPercent)} down payment`;
 
   return (
     <aside
@@ -156,12 +177,12 @@ export default function BookingPriceReceipt({
           <dd>{php.format(receipt.totalMinor / 100)}</dd>
         </div>
         <div className="booking-receipt-down">
-          <dt>50% down payment</dt>
-          <dd>{php.format((downPaymentMinor ?? receipt.downPaymentMinor) / 100)}</dd>
+          <dt>{downPaymentLabel}</dt>
+          <dd>{php.format(displayDownPaymentMinor / 100)}</dd>
         </div>
         <div>
           <dt>Remaining accommodation balance</dt>
-          <dd>{php.format(receipt.remainingBalanceMinor / 100)}</dd>
+          <dd>{php.format((receipt.totalMinor - displayDownPaymentMinor) / 100)}</dd>
         </div>
         <div>
           <dt>
@@ -169,13 +190,13 @@ export default function BookingPriceReceipt({
             <br />
             <small>Due upon check-in on the check-in day · separate from the down payment</small>
           </dt>
-          <dd>{php.format((refundableSecurityDepositMinor ?? receipt.refundableSecurityDepositMinor ?? RECHELS_PLACE_REFUNDABLE_SECURITY_DEPOSIT_MINOR) / 100)}</dd>
+          <dd>{php.format(displaySecurityDepositMinor / 100)}</dd>
         </div>
         {bookingStatus ? <div><dt>Booking status</dt><dd>{bookingStatus.replaceAll("_", " ")}</dd></div> : null}
         {paymentStatus ? <div><dt>Payment status</dt><dd>{paymentStatus.replaceAll("_", " ")}</dd></div> : null}
       </dl>
       <p>
-        The 50% down payment secures the accommodation balance. The ₱1,000
+        The {downPaymentLabel} secures the accommodation balance. The {php.format(displaySecurityDepositMinor / 100)}
         refundable security deposit is separate and due upon check-in on that
         day. Rechel confirms availability, house rules, and any final payment
         instructions after reviewing the request.

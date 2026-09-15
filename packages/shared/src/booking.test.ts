@@ -1,15 +1,32 @@
 import { describe, expect, it } from "vitest";
 import {
   availabilitySearchSchema,
-  calculateSnowazNightlyRateMinor,
   calculateSnowazBookingReceipt,
   calculateStayTotalMinor,
   normalizeGuestEmail,
   reservationRequestSchema,
   bookingEnquirySchema,
-  rechelsPlacePricingStrategy,
+  createRechelsPlacePricingStrategy,
   stayNights,
 } from "./booking";
+import type { RechelsPricingConfig } from "./pricing";
+
+const pricing: RechelsPricingConfig = {
+  version: "test",
+  wholeCondoNightlyRateMinor: 450_000,
+  masterBedroomNightlyRateMinor: 170_000,
+  secondBedroomNightlyRateMinor: 170_000,
+  secondBedroomThreeGuestNightlyRateMinor: 195_000,
+  secondBedroomFourGuestNightlyRateMinor: 210_000,
+  additionalGuestFeeMinor: 25_000,
+  carParkingNightlyRateMinor: 35_000,
+  motorcycleParkingNightlyRateMinor: 15_000,
+  earlyCheckinHourlyRateMinor: 15_000,
+  lateCheckoutHourlyRateMinor: 15_000,
+  refundableSecurityDepositMinor: 100_000,
+  downPaymentPercent: 50,
+  settings: [],
+};
 
 describe("booking contracts", () => {
   it("rejects impossible calendar dates", () => {
@@ -86,22 +103,31 @@ describe("booking enquiries", () => {
       bookingEnquirySchema.safeParse({ ...request, preferredContact: "email" })
         .success,
     ).toBe(false));
+  it("accepts a pricing revision and client estimate for server revalidation", () =>
+    expect(
+      bookingEnquirySchema.safeParse({
+        ...request,
+        pricingVersion: "12",
+        clientTotalMinor: "450000",
+      }).success,
+    ).toBe(true));
 });
 
 describe("money calculations", () => {
   it("uses the current whole-condo nightly rate", () => {
-    expect(calculateSnowazNightlyRateMinor(2, "both_bedrooms")).toBe(450_000);
-    expect(calculateSnowazNightlyRateMinor(6, "both_bedrooms")).toBe(450_000);
-    expect(() => calculateSnowazNightlyRateMinor(7)).toThrow(RangeError);
+    const strategy = createRechelsPlacePricingStrategy(pricing);
+    expect(strategy.nightlyRateMinor(2, "both_bedrooms")).toBe(450_000);
+    expect(strategy.nightlyRateMinor(6, "both_bedrooms")).toBe(450_000);
+    expect(() => strategy.nightlyRateMinor(7, "both_bedrooms")).toThrow(RangeError);
   });
 
   it("defaults new pricing requests to the whole-condo rate", () => {
-    expect(calculateSnowazNightlyRateMinor(2)).toBe(450_000);
+    expect(createRechelsPlacePricingStrategy(pricing).nightlyRateMinor(2, "both_bedrooms")).toBe(450_000);
   });
 
   it("allows a different property strategy to reuse the receipt workflow", () => {
     const strategy = {
-      ...rechelsPlacePricingStrategy,
+      ...createRechelsPlacePricingStrategy(pricing),
       nightlyRateMinor: () => 600_000,
       baseNightlyRateMinor: () => 600_000,
       additionalGuestChargeMinor: () => 0,
@@ -128,7 +154,7 @@ describe("money calculations", () => {
 
   it("builds a receipt with a 50% down payment and separate security deposit", () => {
     expect(
-      calculateSnowazBookingReceipt("2026-09-01", "2026-09-04", 5, "none", "both_bedrooms"),
+      calculateSnowazBookingReceipt("2026-09-01", "2026-09-04", 5, "none", "both_bedrooms", 0, 0, createRechelsPlacePricingStrategy(pricing)),
     ).toEqual({
       nights: 3,
       guests: 5,
@@ -151,6 +177,7 @@ describe("money calculations", () => {
       extrasTotalMinor: 0,
       totalMinor: 1_350_000,
       downPaymentMinor: 675_000,
+      downPaymentPercent: 50,
       refundableSecurityDepositMinor: 100_000,
       remainingBalanceMinor: 675_000,
     });
@@ -162,18 +189,54 @@ describe("money calculations", () => {
       2,
       "none",
       "both_bedrooms",
+      0,
+      0,
+      createRechelsPlacePricingStrategy(pricing),
     );
     expect(receipt.totalMinor).toBe(450_000);
     expect(receipt.downPaymentMinor).toBe(225_000);
     expect(receipt.remainingBalanceMinor).toBe(225_000);
     expect(receipt.refundableSecurityDepositMinor).toBe(100_000);
   });
+  it("propagates changed centralized rates through the complete receipt", () => {
+    const changedPricing = {
+      ...pricing,
+      version: "13",
+      wholeCondoNightlyRateMinor: 500_000,
+      carParkingNightlyRateMinor: 40_000,
+      earlyCheckinHourlyRateMinor: 20_000,
+      lateCheckoutHourlyRateMinor: 30_000,
+      refundableSecurityDepositMinor: 120_000,
+      downPaymentPercent: 40,
+    };
+    const receipt = calculateSnowazBookingReceipt(
+      "2026-09-01",
+      "2026-09-03",
+      2,
+      "car",
+      "both_bedrooms",
+      1,
+      2,
+      createRechelsPlacePricingStrategy(changedPricing),
+    );
+    expect(receipt).toMatchObject({
+      baseNightlyRateMinor: 500_000,
+      parkingNightlyRateMinor: 40_000,
+      parkingChargeMinor: 80_000,
+      earlyCheckInFeeMinor: 20_000,
+      lateCheckoutFeeMinor: 60_000,
+      totalMinor: 1_160_000,
+      downPaymentMinor: 464_000,
+      downPaymentPercent: 40,
+      refundableSecurityDepositMinor: 120_000,
+    });
+  });
   it("adds optional parking per night", () => {
-    expect(calculateSnowazBookingReceipt("2026-09-01", "2026-09-03", 2, "car").parkingChargeMinor).toBe(70_000);
-    expect(calculateSnowazBookingReceipt("2026-09-01", "2026-09-03", 2, "motorcycle").parkingChargeMinor).toBe(30_000);
+    expect(calculateSnowazBookingReceipt("2026-09-01", "2026-09-03", 2, "car", "both_bedrooms", 0, 0, createRechelsPlacePricingStrategy(pricing)).parkingChargeMinor).toBe(70_000);
+    expect(calculateSnowazBookingReceipt("2026-09-01", "2026-09-03", 2, "motorcycle", "both_bedrooms", 0, 0, createRechelsPlacePricingStrategy(pricing)).parkingChargeMinor).toBe(30_000);
   });
   it("itemizes early and late time without multiplying the fee by nights", () => {
-    const receipt = calculateSnowazBookingReceipt("2026-09-01", "2026-09-04", 3, "car", "bedroom_2", 2, 3);
+    const receipt = calculateSnowazBookingReceipt("2026-09-01", "2026-09-04", 3, "car", "bedroom_2", 2, 3, createRechelsPlacePricingStrategy(pricing));
     expect(receipt).toMatchObject({
       earlyCheckInTime: "12:00",
       earlyCheckInFeeMinor: 30_000,

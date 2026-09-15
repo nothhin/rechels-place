@@ -17,6 +17,10 @@ import { LiveRouteRefresh } from "../../LiveRouteRefresh";
 import { GuestCountEditor } from "./GuestCountEditor";
 import { DeviceStatusAlerts } from "./DeviceStatusAlerts";
 import { submitDepositReference } from "./actions";
+import { getPublicPricing } from "@/lib/server/pricing";
+import { formatPhpMinor, formatPricingPercent } from "@uppadar-hollie/shared/pricing";
+import { stayNights } from "@uppadar-hollie/shared/booking";
+import type { BookingPriceSnapshot } from "../../BookingPriceReceipt";
 
 export const metadata: Metadata = {
   title: "Payment details | Rechel's Place",
@@ -44,6 +48,7 @@ export default async function DepositPage({
   });
   if (error) throw new Error("Deposit service is unavailable.");
   const row = Array.isArray(data) ? data[0] : null;
+  const publicPricing = await getPublicPricing();
   const request = row
     ? {
         fullName: row.full_name as string,
@@ -59,10 +64,34 @@ export default async function DepositPage({
         lateCheckoutHours: Number(row.late_checkout_hours ?? 0),
         bookingStatus: row.booking_status as string,
         depositStatus: row.deposit_status as string,
-        downPaymentAmountMinor: Number(
-          row.down_payment_amount_minor ?? Math.ceil(Number(row.total_minor) / 2),
-        ),
-        securityDepositAmountMinor: Number(row.deposit_amount_minor ?? 100_000),
+        downPaymentAmountMinor: Number(row.down_payment_amount_minor ?? 0),
+        securityDepositAmountMinor: Number(row.deposit_amount_minor ?? 0),
+        bookingSnapshot: {
+          nights: stayNights(row.check_in as string, row.check_out as string),
+          guests: Number(row.guest_count ?? 0),
+          bedrooms: row.bedroom_choice === "both_bedrooms" ? 2 : 1,
+          baseNightlyRateMinor: Number(row.base_nightly_rate_minor ?? 0),
+          nightlyRateMinor: Number(row.nightly_rate_minor ?? row.base_nightly_rate_minor ?? 0),
+          additionalGuests: Number(row.additional_guest_count ?? 0),
+          additionalGuestChargeMinor: Number(row.additional_guest_charge_minor ?? 0),
+          accommodationSubtotalMinor: Number(row.accommodation_subtotal_minor ?? 0),
+          parkingType: row.parking_type as "none" | "car" | "motorcycle",
+          parkingNightlyRateMinor: Number(row.parking_nightly_rate_minor ?? 0),
+          parkingChargeMinor: Number(row.parking_charge_minor ?? 0),
+          earlyCheckInHours: Number(row.early_check_in_hours ?? 0),
+          earlyCheckInTime: (row.early_check_in_time as string | null) ?? null,
+          earlyCheckInFeeMinor: Number(row.early_check_in_fee_minor ?? 0),
+          lateCheckoutHours: Number(row.late_checkout_hours ?? 0),
+          lateCheckoutTime: (row.late_checkout_time as string | null) ?? null,
+          lateCheckoutFeeMinor: Number(row.late_checkout_fee_minor ?? 0),
+          timeExtensionChargeMinor: Number(row.early_check_in_fee_minor ?? 0) + Number(row.late_checkout_fee_minor ?? 0),
+          extrasTotalMinor: Number(row.extras_total_minor ?? 0),
+          totalMinor: Number(row.total_minor ?? 0),
+          downPaymentMinor: Number(row.down_payment_amount_minor ?? 0),
+          downPaymentPercent: Number(row.total_minor ?? 0) > 0 ? Number(row.down_payment_amount_minor ?? 0) / Number(row.total_minor) * 100 : 0,
+          refundableSecurityDepositMinor: Number(row.deposit_amount_minor ?? 0),
+          remainingBalanceMinor: Number(row.total_minor ?? 0) - Number(row.down_payment_amount_minor ?? 0),
+        } satisfies BookingPriceSnapshot,
         depositTokenExpiresAt: row.deposit_token_expires_at
           ? new Date(row.deposit_token_expires_at as string)
           : null,
@@ -134,6 +163,8 @@ export default async function DepositPage({
             customerPhone={request.phone}
             bookingStatus={request.bookingStatus}
             paymentStatus={request.depositStatus}
+            pricing={publicPricing}
+            bookingSnapshot={request.bookingSnapshot}
           />
         ) : (
           <BookingPriceReceipt
@@ -152,6 +183,7 @@ export default async function DepositPage({
             paymentStatus={request.depositStatus}
             downPaymentMinor={request.downPaymentAmountMinor}
             refundableSecurityDepositMinor={request.securityDepositAmountMinor}
+            snapshot={request.bookingSnapshot}
           />
         )}
         {finished ? (
@@ -174,11 +206,11 @@ export default async function DepositPage({
         ) : (
           <>
             <section className={styles.instructions}>
-              <h2>Pay the 50% down payment</h2>
+              <h2>Pay the {request.bookingSnapshot.downPaymentPercent}% down payment</h2>
               <ol>
-                <li>Review your stay total and 50% down payment in the receipt above.</li>
-                <li>Scan the GCash/InstaPay QR below and send only the 50% down payment. Transfer fees may apply.</li>
-                <li>The ₱1,000 refundable security deposit is separate and is due upon check-in on your check-in day. Do not include it in this transfer.</li>
+                <li>Review your stay total and {formatPricingPercent(request.bookingSnapshot.downPaymentPercent)} down payment in the receipt above.</li>
+                <li>Scan the GCash/InstaPay QR below and send only the {formatPricingPercent(request.bookingSnapshot.downPaymentPercent)} down payment. Transfer fees may apply.</li>
+                <li>The {formatPhpMinor(request.securityDepositAmountMinor)} refundable security deposit is separate and is due upon check-in on your check-in day. Do not include it in this transfer.</li>
                 <li>Keep your receipt, then submit the sender name and transaction reference below.</li>
               </ol>
               <p>
@@ -210,7 +242,7 @@ export default async function DepositPage({
                   <h2>Tell us who sent the payment</h2>
                   <p>
                     Enter the sender name and transaction reference exactly as
-                    shown on your receipt. Rechel’s Place will verify the 50%
+                    shown on your receipt. Rechel’s Place will verify the {formatPricingPercent(request.bookingSnapshot.downPaymentPercent)}
                     down payment before confirming your stay.
                   </p>
                   <form className={styles.form} action={submitDepositReference}>
@@ -243,7 +275,7 @@ export default async function DepositPage({
                   <MessengerReceiptLink
                     className={styles.messengerAction}
                     label="Copy message and open Messenger"
-                    message={`Hello Rechel’s Place! I am ${request.fullName}. I paid the 50% down payment for my stay on ${formatStayDate(request.checkIn)} to ${formatStayDate(request.checkOut)}. I am attaching my GCash/InstaPay receipt for verification.`}
+                    message={`Hello Rechel’s Place! I am ${request.fullName}. I paid the ${formatPricingPercent(request.bookingSnapshot.downPaymentPercent)} down payment for my stay on ${formatStayDate(request.checkIn)} to ${formatStayDate(request.checkOut)}. I am attaching my GCash/InstaPay receipt for verification.`}
                   />
                 </article>
               </div>

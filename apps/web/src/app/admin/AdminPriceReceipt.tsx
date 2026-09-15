@@ -1,12 +1,14 @@
 import type { AdminEnquiry } from "./BookingRequestsPanel";
+import { formatPricingPercent } from "@uppadar-hollie/shared/pricing";
 import styles from "./admin.module.css";
 
 const php = new Intl.NumberFormat("en-PH", { style:"currency", currency:"PHP", maximumFractionDigits:0 });
 const bedroomLabels = { bedroom_1:"Legacy single-bedroom record", bedroom_2:"Legacy single-bedroom record", both_bedrooms:"Entire two-bedroom condo" } as const;
 
 export function AdminPriceReceipt({ booking }: { booking:AdminEnquiry }) {
-  const downPaymentMinor = booking.downPaymentAmountMinor ?? Math.ceil(booking.totalMinor / 2);
-  const securityDepositMinor = booking.securityDepositAmountMinor ?? booking.depositAmountMinor;
+  const downPaymentMinor = booking.downPaymentAmountMinor ?? 0;
+  const securityDepositMinor = booking.securityDepositAmountMinor ?? booking.depositAmountMinor ?? 0;
+  const downPaymentPercent = booking.totalMinor > 0 ? downPaymentMinor / booking.totalMinor * 100 : 0;
   return <section className={styles.adminReceipt} aria-label="Booking payment receipt"><header><strong>Payment summary</strong><span>{booking.remainingBalanceMinor === 0 ? "Fully paid" : "Balance due"}</span></header><dl>
     {booking.bookingReference?<div><dt>Booking reference</dt><dd>{booking.bookingReference}</dd></div>:null}
     <div><dt>Guest contact</dt><dd>{booking.phone}{booking.email?` · ${booking.email}`:""}</dd></div>
@@ -22,7 +24,7 @@ export function AdminPriceReceipt({ booking }: { booking:AdminEnquiry }) {
     <div><dt>Accommodation subtotal</dt><dd>{php.format((booking.accommodationSubtotalMinor??(booking.totalMinor-(booking.extrasTotalMinor??booking.parkingChargeMinor??0)))/100)}</dd></div>
     {(booking.extrasTotalMinor??0)>0?<div><dt>Extras total</dt><dd>+{php.format((booking.extrasTotalMinor??0)/100)}</dd></div>:null}
     <div><dt>Final total</dt><dd>{php.format(booking.totalMinor/100)}</dd></div>
-    <div><dt>50% down payment</dt><dd>{php.format(downPaymentMinor/100)}</dd></div>
+    <div><dt>{formatPricingPercent(downPaymentPercent)} down payment</dt><dd>{php.format(downPaymentMinor/100)}</dd></div>
     <div><dt>Refundable security deposit<br/><small>Due upon check-in on the check-in day · separate from the down payment</small></dt><dd>{php.format(securityDepositMinor/100)}</dd></div>
     <div><dt>Balance payments recorded</dt><dd>{booking.balancePaidMinor>0?"−":""}{php.format(booking.balancePaidMinor/100)}</dd></div>
     <div className={styles.adminReceiptBalance}><dt>Remaining balance</dt><dd>{php.format(booking.remainingBalanceMinor/100)}</dd></div>

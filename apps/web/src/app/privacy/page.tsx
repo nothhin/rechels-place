@@ -42,7 +42,7 @@ export default function PrivacyPage() {
             record of your consent. During the payment-proof step, we also
             collect the sender name, transaction reference, payment status,
             verification time, and any applicable refund reference. The
-            separate ₱1,000 security deposit is due at check-in and is not
+            separate refundable security deposit is due at check-in and is not
             collected through this payment page.
             We do not collect your PIN, OTP, password, account balance, or full
             banking credentials. Our hosting and database services may also

@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./booking": "./src/booking.ts",
-    "./booking-lifecycle": "./src/booking-lifecycle.ts"
+    "./booking-lifecycle": "./src/booking-lifecycle.ts",
+    "./pricing": "./src/pricing.ts"
   },
   "scripts": {
     "check": "tsc --noEmit",

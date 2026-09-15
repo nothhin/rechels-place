@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { bookingEnquirySchema } from "@uppadar-hollie/shared/booking";
+import { pricingConfigFromPayload, type RechelsPricingConfig } from "@uppadar-hollie/shared/pricing";
 import {
   createDepositToken,
   hashDepositToken,
@@ -9,11 +10,14 @@ import {
 import { createPublicSupabaseClient } from "@/lib/supabase/public-server";
 
 export type BookingActionState = {
-  status: "idle" | "success" | "error";
+  status: "idle" | "success" | "error" | "stale";
   message?: string;
   bookingReference?: string;
   depositLink?: string;
   depositExpiresAt?: string;
+  pricing?: RechelsPricingConfig;
+  previousTotalMinor?: number;
+  currentTotalMinor?: number;
 };
 
 async function saveBookingRequest(formData: FormData) {
@@ -41,7 +45,7 @@ async function saveBookingRequest(formData: FormData) {
 
   try {
     const { data, error } = await supabase.rpc(
-      "submit_snowaz_booking_request",
+      "submit_snowaz_booking_request_v2",
       {
         request_idempotency: parsed.data.idempotencyKey,
         guest_name: parsed.data.fullName,
@@ -58,11 +62,33 @@ async function saveBookingRequest(formData: FormData) {
         contact_method: parsed.data.preferredContact,
         consent_version: "booking-request-v2",
         token_hash: hashDepositToken(depositToken),
+        pricing_version: parsed.data.pricingVersion || null,
+        client_total_minor: typeof parsed.data.clientTotalMinor === "number" ? parsed.data.clientTotalMinor : null,
       },
     );
     if (error) throw error;
     const booking = Array.isArray(data) ? data[0] : null;
     if (!booking) throw new Error("Booking request was not created.");
+    if (booking.pricing_changed) {
+      let pricing: RechelsPricingConfig | undefined;
+      try {
+        pricing = pricingConfigFromPayload(booking.current_pricing);
+      } catch {
+        return {
+          ok: false as const,
+          stale: true as const,
+          message: "The prices changed while you were booking. Please review the updated total.",
+        };
+      }
+      return {
+        ok: false as const,
+        stale: true as const,
+        pricing,
+        previousTotalMinor: Number(booking.previous_total_minor ?? parsed.data.clientTotalMinor ?? 0),
+        currentTotalMinor: Number(booking.current_total_minor ?? 0),
+        message: "The prices changed while you were booking. Please review the updated total.",
+      };
+    }
     const result = {
       bookingReference: booking.booking_reference as string,
       depositExpiresAt: booking.deposit_expires_at as string,
@@ -129,12 +155,20 @@ export async function submitBookingRequestInline(
         depositLink: `/deposit/${result.depositToken}?reference=${encodeURIComponent(result.bookingReference)}`,
         depositExpiresAt: result.depositExpiresAt,
       }
-    : { status: "error", message: result.message };
+    : result.stale
+      ? {
+          status: "stale",
+          message: result.message,
+          pricing: result.pricing,
+          previousTotalMinor: result.previousTotalMinor,
+          currentTotalMinor: result.currentTotalMinor,
+        }
+      : { status: "error", message: result.message };
 }
 
 export async function submitBookingRequest(formData: FormData) {
   const result = await saveBookingRequest(formData);
-  if (!result.ok) redirect("/book?error=unavailable");
+  if (!result.ok) redirect(result.stale ? "/#availability" : "/book?error=unavailable");
   redirect(
     `/deposit/${result.depositToken}?new=1&reference=${encodeURIComponent(result.bookingReference)}`,
   );
