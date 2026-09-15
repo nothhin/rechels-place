@@ -40,6 +40,8 @@ const pendingSnapshotPath = fileURLToPath(new URL("../../../supabase/migrations/
 const pendingSnapshot = readFileSync(pendingSnapshotPath, "utf8");
 const priceFailureAuditPath = fileURLToPath(new URL("../../../supabase/migrations/20260915030000_price_update_failure_audit.sql", import.meta.url));
 const priceFailureAudit = readFileSync(priceFailureAuditPath, "utf8");
+const pricingRpcExecutionPath = fileURLToPath(new URL("../../../supabase/migrations/20260915040000_fix_pricing_rpc_execution.sql", import.meta.url));
+const pricingRpcExecution = readFileSync(pricingRpcExecutionPath, "utf8");
 
 describe("initial database migration", () => {
   it("enforces a single property settings row", () => {
@@ -270,5 +272,11 @@ describe("Rechel's Place centralized pricing", () => {
     expect(priceFailureAudit).toContain("pricing.update_failed");
     expect(priceFailureAudit).toContain("price_revision_conflict");
     expect(priceFailureAudit).toContain("grant execute on function public.staff_update_snowaz_price");
+  });
+
+  it("keeps the safe pricing payload available through client RPCs", () => {
+    expect(pricingRpcExecution).toContain("get_snowaz_public_pricing");
+    expect(pricingRpcExecution).toContain("security definer set search_path = ''");
+    expect(pricingRpcExecution).toContain("staff_get_snowaz_pricing");
   });
 });
