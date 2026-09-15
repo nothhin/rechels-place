@@ -543,9 +543,7 @@ export async function updateBookingOperations(
         ? "The agreed price snapshot is protected. Change only operational details that do not alter the stay total."
         : error?.message.includes("unavailable")
           ? "Those dates conflict with a booking or maintenance block."
-          : error?.message.includes("below payments")
-            ? "The repriced total cannot be lower than payments already received."
-            : "The booking could not be updated.",
+          : "The booking could not be updated.",
     };
   revalidatePath("/admin");
   revalidatePath("/admin/operations");
