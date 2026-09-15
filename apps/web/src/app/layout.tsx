@@ -11,7 +11,7 @@ const displayFont = EB_Garamond({ variable: "--font-display", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: { default: "Rechel's Place | Staycation", template: "%s | Rechel's Place" },
-  description: "Stay in Rechel's entire two-bedroom condo in Cagayan de Oro, with 5 beds, 2.5 baths, 31 Mbps Wi-Fi, a 65-inch HDTV, pool access, and keypad self check-in.",
+  description: "Stay in Rechel's entire two-bedroom condo in Cagayan de Oro, with 5 beds, 2.5 baths, 100 Mbps Wi-Fi, a 65-inch HDTV, pool access, and keypad self check-in.",
   applicationName: "Rechel's Place",
   manifest: "/manifest.webmanifest",
   icons: {

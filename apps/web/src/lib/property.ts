@@ -21,7 +21,7 @@ export const propertyProfile = {
   maxGuests: 6,
   bedLabel: "5 beds",
   bathroomLabel: "2.5 baths",
-  wifiLabel: "31 Mbps Wi-Fi",
+  wifiLabel: "100 Mbps Wi-Fi",
   floorLabel: "12th floor",
   hostName: "Rechel",
   hostResponseLabel: "100% response rate · within an hour",
@@ -68,7 +68,7 @@ export const galleryLinks = [
 export const amenityHighlights = [
   ["2", "Bedrooms"],
   ["6", "Guests maximum"],
-  ["31", "Mbps Wi-Fi"],
+  ["100", "Mbps Wi-Fi"],
   ["4.95/5", "Airbnb rating"],
 ] as const;
 
@@ -79,7 +79,7 @@ export const stayHighlights = [
   },
   {
     title: "Cook, connect, unwind",
-    copy: "Use the open-plan kitchen and dining area, work online with verified 31 Mbps Wi-Fi, and unwind with a 65-inch HDTV and Bluetooth sound system.",
+    copy: "Use the open-plan kitchen and dining area, work online with 100 Mbps Wi-Fi, and unwind with a 65-inch HDTV and Bluetooth sound system.",
   },
   {
     title: "Walkable and well connected",
@@ -164,7 +164,7 @@ export const amenityGroups = [
     title: "Internet and office",
     icon: "wifi",
     items: [
-      { name: "Wi-Fi – 31 Mbps", detail: "Verified by speed test. Stream 4K videos and join video calls." },
+      { name: "Wi-Fi – 100 Mbps", detail: "Stream videos and join video calls." },
       { name: "Dedicated workspace", detail: "In a common space" },
     ],
   },
@@ -177,8 +177,6 @@ export const amenityGroups = [
       { name: "Microwave" },
       { name: "Cooking basics", detail: "Pots and pans, oil, salt and pepper" },
       { name: "Dishes and silverware", detail: "Bowls, chopsticks, plates, cups, etc." },
-      { name: "Mini fridge" },
-      { name: "Freezer" },
       { name: "Induction stove" },
       { name: "Hot water kettle" },
       { name: "Coffee maker: drip coffee maker" },
