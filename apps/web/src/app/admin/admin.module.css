@@ -1760,7 +1760,6 @@
   .mobileDrawer { background: #40372f; }
 }
 
-:global(.deposit-guide-form){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;width:100%;margin-top:14px;padding:16px;border:1px solid #e5d5c4;border-radius:12px;background:#fff8ef}:global(.deposit-guide-form strong),:global(.deposit-guide-form small),:global(.deposit-guide-form button){grid-column:1/-1}:global(.deposit-guide-form strong){font-size:12px}:global(.deposit-guide-form small){color:#75685e;font-size:9px;line-height:1.45}:global(.deposit-guide-form input){width:100%;min-width:0;min-height:40px;padding:0 10px;border:1px solid #ddd1c4;border-radius:8px;background:#fff;font-size:10px}:global(.deposit-guide-form button){min-height:40px;border:0;border-radius:999px;background:#3c342d;color:#fff;font-size:9px;font-weight:800;cursor:pointer}@media(max-width:720px){:global(.deposit-guide-form){grid-template-columns:1fr!important}}
 
 /* Calm operations layout: keep the workspace scannable at a glance. */
 .dashboardShell {
