@@ -13,7 +13,7 @@ function isAuthorized(request: Request) {
 export async function GET(request: Request) {
   if (!isAuthorized(request)) return Response.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const result = await syncAirbnbCalendar();
+    const result = await syncAirbnbCalendar({ trigger: "cron" });
     return Response.json({ ok: true, data: result }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     return Response.json({ ok: false, error: error instanceof Error ? error.message : "Calendar sync failed." }, { status: 503, headers: { "Cache-Control": "no-store" } });

@@ -19,7 +19,13 @@ describe("external calendar adapter", () => {
 
     expect(adapter.provider).toBe("airbnb");
     await expect(adapter.fetchEvents("https://example.com/calendar.ics")).resolves.toEqual([
-      { externalUid: "airbnb-adapter-test", checkIn: "2026-10-10", checkOut: "2026-10-12" },
+      {
+        externalUid: "airbnb-adapter-test",
+        checkIn: "2026-10-10",
+        checkOut: "2026-10-12",
+        summary: "Unavailable",
+        sourceStatus: "UNKNOWN",
+      },
     ]);
   });
 
@@ -30,6 +36,16 @@ describe("external calendar adapter", () => {
 
     await expect(adapter.fetchEvents("https://example.com/calendar.ics")).rejects.toThrow(
       "Airbnb calendar returned HTTP 503.",
+    );
+  });
+
+  it("converts network failures into a safe actionable message", async () => {
+    const adapter = createAirbnbCalendarAdapter(
+      async () => { throw new TypeError("socket details should not reach the admin"); },
+    );
+
+    await expect(adapter.fetchEvents("https://example.com/calendar.ics")).rejects.toThrow(
+      "Airbnb calendar could not be reached.",
     );
   });
 });

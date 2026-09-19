@@ -42,6 +42,8 @@ const priceFailureAuditPath = fileURLToPath(new URL("../../../supabase/migration
 const priceFailureAudit = readFileSync(priceFailureAuditPath, "utf8");
 const pricingRpcExecutionPath = fileURLToPath(new URL("../../../supabase/migrations/20260915040000_fix_pricing_rpc_execution.sql", import.meta.url));
 const pricingRpcExecution = readFileSync(pricingRpcExecutionPath, "utf8");
+const airbnbSyncHardeningPath = fileURLToPath(new URL("../../../supabase/migrations/20260919000000_airbnb_calendar_sync_hardening.sql", import.meta.url));
+const airbnbSyncHardening = readFileSync(airbnbSyncHardeningPath, "utf8");
 
 describe("initial database migration", () => {
   it("enforces a single property settings row", () => {
@@ -278,5 +280,25 @@ describe("Rechel's Place centralized pricing", () => {
     expect(pricingRpcExecution).toContain("get_snowaz_public_pricing");
     expect(pricingRpcExecution).toContain("security definer set search_path = ''");
     expect(pricingRpcExecution).toContain("staff_get_snowaz_pricing");
+  });
+});
+
+describe("Rechel's Place two-way Airbnb calendar sync", () => {
+  it("stores imported metadata in a protected table and records sync history", () => {
+    expect(airbnbSyncHardening).toContain("add column if not exists summary");
+    expect(airbnbSyncHardening).toContain("create table if not exists public.external_calendar_sync_runs");
+    expect(airbnbSyncHardening).toContain("alter table public.external_calendar_sync_runs enable row level security");
+  });
+
+  it("serializes syncs and replaces only the Airbnb-owned event set", () => {
+    expect(airbnbSyncHardening).toContain("acquire_snowaz_airbnb_sync_lock");
+    expect(airbnbSyncHardening).toContain("replace_snowaz_airbnb_events");
+    expect(airbnbSyncHardening).toContain("status = 'cancelled'");
+  });
+
+  it("keeps the staff status response useful without granting client table access", () => {
+    expect(airbnbSyncHardening).toContain("'recentRuns'");
+    expect(airbnbSyncHardening).toContain("revoke all on table public.external_calendar_sync_runs from public, anon, authenticated");
+    expect(airbnbSyncHardening).toContain("grant execute on function public.staff_get_snowaz_airbnb_sync_status() to authenticated");
   });
 });

@@ -1,11 +1,28 @@
 import "server-only";
 
-import { createClient } from "@supabase/supabase-js";
+import { randomUUID } from "node:crypto";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { normalizeAirbnbIcalUrl } from "./airbnb-calendar-url";
 import { airbnbCalendarAdapter } from "./airbnb-calendar-adapter";
 export { isAirbnbExportTokenValid, parseAirbnbCalendar } from "./airbnb-calendar-parser";
 
 const SYNC_STALE_AFTER_MS = 15 * 60 * 1_000;
+const SYNC_LOCK_MS = 10 * 60 * 1_000;
+
+export type AirbnbSyncTrigger = "manual" | "cron" | "background";
+
+export type AirbnbSyncRun = {
+  id: string;
+  triggerSource: AirbnbSyncTrigger;
+  importSource: "admin" | "vercel" | "unknown";
+  status: "running" | "succeeded" | "failed";
+  startedAt: string;
+  finishedAt: string | null;
+  eventsSeen: number;
+  conflictsSeen: number;
+  activeEvents: number;
+  errorMessage: string | null;
+};
 
 export type AirbnbSyncResult = {
   eventsSeen: number;
@@ -24,7 +41,10 @@ export type AirbnbSyncStatus = {
   eventsSeen: number;
   conflictsSeen: number;
   updatedAt: string | null;
+  syncLockUntil: string | null;
   activeEvents: number;
+  websiteBookings: number;
+  recentRuns: AirbnbSyncRun[];
 };
 
 type CalendarConfiguration = {
@@ -47,7 +67,9 @@ function readHttpsUrl(value: string | undefined) {
 }
 
 export function getAirbnbCalendarConfiguration(): CalendarConfiguration {
-  const exportToken = process.env.AIRBNB_CALENDAR_TOKEN?.trim() || null;
+  const exportToken = process.env.AIRBNB_CALENDAR_TOKEN?.trim()
+    || process.env.ICAL_EXPORT_TOKEN?.trim()
+    || null;
   return {
     importUrl: readHttpsUrl(process.env.AIRBNB_ICAL_URL),
     exportToken: exportToken && exportToken.length >= 32 ? exportToken : null,
@@ -64,6 +86,35 @@ function createSupabaseAdminClient() {
   return createClient(url, configuration.serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+}
+
+function baseUrlFromEnvironment() {
+  const configured = readHttpsUrl(process.env.NEXT_PUBLIC_SITE_URL);
+  if (configured) return configured;
+  const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (productionHost) return readHttpsUrl(`https://${productionHost}`);
+  const deploymentHost = process.env.VERCEL_URL?.trim();
+  return deploymentHost ? readHttpsUrl(`https://${deploymentHost}`) : null;
+}
+
+export function getAirbnbCalendarExportPath() {
+  const token = getAirbnbCalendarConfiguration().exportToken;
+  return token ? `/api/calendar/airbnb/${encodeURIComponent(token)}.ics` : null;
+}
+
+/** The bearer URL is generated only for the authenticated admin workspace. */
+export function getAirbnbCalendarExportUrl(origin?: string) {
+  const path = getAirbnbCalendarExportPath();
+  if (!path) return null;
+  const candidate = origin?.trim() || baseUrlFromEnvironment();
+  if (!candidate) return path;
+  try {
+    const base = new URL(candidate);
+    if (!['http:', 'https:'].includes(base.protocol)) return path;
+    return new URL(path, base).toString();
+  } catch {
+    return path;
+  }
 }
 
 export async function getAirbnbImportSource() {
@@ -180,100 +231,167 @@ export async function buildWebsiteIcalFeed() {
   return `${lines.join("\r\n")}\r\n`;
 }
 
-async function updateSyncState(values: Record<string, unknown>) {
-  const admin = createSupabaseAdminClient();
-  if (!admin) return;
-  await admin.from("external_calendar_sync_state").upsert({ provider: "airbnb", ...values }, { onConflict: "provider" });
+function emptySyncStatus(): AirbnbSyncStatus {
+  return {
+    provider: "airbnb",
+    status: "never",
+    lastStartedAt: null,
+    lastSucceededAt: null,
+    lastFailedAt: null,
+    lastError: null,
+    eventsSeen: 0,
+    conflictsSeen: 0,
+    updatedAt: null,
+    syncLockUntil: null,
+    activeEvents: 0,
+    websiteBookings: 0,
+    recentRuns: [],
+  };
+}
+
+function normalizeRun(value: Record<string, unknown>): AirbnbSyncRun {
+  return {
+    id: String(value.id ?? ""),
+    triggerSource: value.trigger_source as AirbnbSyncTrigger,
+    importSource: value.import_source as AirbnbSyncRun["importSource"],
+    status: value.status as AirbnbSyncRun["status"],
+    startedAt: String(value.started_at ?? ""),
+    finishedAt: typeof value.finished_at === "string" ? value.finished_at : null,
+    eventsSeen: Number(value.events_seen ?? 0),
+    conflictsSeen: Number(value.conflicts_seen ?? 0),
+    activeEvents: Number(value.active_events ?? 0),
+    errorMessage: typeof value.error_message === "string" ? value.error_message : null,
+  };
+}
+
+async function updateSyncState(admin: SupabaseClient, values: Record<string, unknown>, lockId?: string) {
+  let query = admin.from("external_calendar_sync_state").update(values).eq("provider", "airbnb");
+  if (lockId) query = query.eq("sync_lock_id", lockId);
+  const { error } = await query;
+  if (error) throw new Error("Airbnb sync status could not be saved.");
+}
+
+async function updateSyncRun(admin: SupabaseClient, id: string, values: Record<string, unknown>) {
+  const { error } = await admin.from("external_calendar_sync_runs").update(values).eq("id", id);
+  if (error) throw new Error("Airbnb sync history could not be saved.");
+}
+
+async function releaseSyncLock(admin: SupabaseClient, lockId: string) {
+  const { error } = await admin.rpc("release_snowaz_airbnb_sync_lock", { p_lock_id: lockId });
+  if (error) console.error("[airbnb-calendar] release lock failed", { code: error.code });
 }
 
 function hasOverlap(left: DateRange, right: DateRange) {
   return left.check_in < right.check_out && left.check_out > right.check_in;
 }
 
-export async function syncAirbnbCalendar(): Promise<AirbnbSyncResult> {
-  const { importUrl } = await getAirbnbImportSource();
+export async function syncAirbnbCalendar(options: { trigger?: AirbnbSyncTrigger } = {}): Promise<AirbnbSyncResult> {
+  const { importUrl, source } = await getAirbnbImportSource();
   if (!importUrl) throw new Error("Airbnb calendar import is not configured.");
   const admin = createSupabaseAdminClient();
   if (!admin) throw new Error("Supabase server credentials are not configured.");
+
+  const trigger = options.trigger ?? "manual";
   const startedAt = new Date().toISOString();
-  await updateSyncState({ status: "running", last_started_at: startedAt, last_error: null, updated_at: startedAt });
+  const lockId = randomUUID();
+  const lockUntil = new Date(Date.now() + SYNC_LOCK_MS).toISOString();
+  const { data: acquired, error: lockError } = await admin.rpc("acquire_snowaz_airbnb_sync_lock", {
+    p_lock_id: lockId,
+    p_lock_until: lockUntil,
+  });
+  if (lockError) throw new Error("Airbnb sync locking is unavailable. Apply the calendar sync migration first.");
+  if (acquired !== true) throw new Error("Airbnb calendar sync is already running. Try again shortly.");
 
+  let runId: string | null = null;
   try {
-    const events = await airbnbCalendarAdapter.fetchEvents(importUrl);
-    // An empty response can be transient. Never clear known Airbnb holds from
-    // a feed that contains no events; that could expose reserved dates.
-    if (events.length === 0) {
-      throw new Error("Airbnb calendar returned no events; existing blocked dates were preserved.");
-    }
-    const rows = events.map((event) => ({
-      provider: "airbnb",
-      external_uid: event.externalUid,
-      check_in: event.checkIn,
-      check_out: event.checkOut,
-      status: "active",
-      last_seen_at: startedAt,
-      updated_at: startedAt,
-    }));
-    if (rows.length) {
-      const { error } = await admin.from("external_calendar_events").upsert(rows, { onConflict: "provider,external_uid" });
-      if (error) throw new Error("Airbnb calendar events could not be saved.");
-    }
-    const { error: staleError } = await admin.from("external_calendar_events")
-      .update({ status: "cancelled", updated_at: startedAt })
-      .eq("provider", "airbnb")
-      .eq("status", "active")
-      .lt("last_seen_at", startedAt);
-    if (staleError) throw new Error("Stale Airbnb calendar events could not be cleared.");
+    const { data: run, error: runError } = await admin.from("external_calendar_sync_runs")
+      .insert({ provider: "airbnb", trigger_source: trigger, import_source: source, status: "running", started_at: startedAt })
+      .select("id")
+      .single();
+    if (runError || !run?.id) throw new Error("Airbnb sync history is unavailable. Apply the calendar sync migration first.");
+    runId = String(run.id);
+    await updateSyncState(admin, { status: "running", last_started_at: startedAt, last_error: null, updated_at: startedAt }, lockId);
 
+    const events = await airbnbCalendarAdapter.fetchEvents(importUrl);
+    // Read website ranges before changing imported rows. A temporary website
+    // data failure therefore preserves both the old rows and availability.
     const ranges = await loadWebsiteCalendarRanges();
-    const bookingRanges = ranges.filter((range) => range.uid.startsWith("website-booking-") || range.uid.startsWith("website-reservation-"));
-    const conflictsSeen = events.filter((event) => bookingRanges.some((range) => hasOverlap(
+    const conflictsSeen = events.filter((event) => ranges.some((range) => hasOverlap(
       { check_in: event.checkIn, check_out: event.checkOut },
       { check_in: range.checkIn, check_out: range.checkOut },
     ))).length;
+    const { data: activeEventsData, error: replaceError } = await admin.rpc("replace_snowaz_airbnb_events", {
+      p_events: events,
+      p_seen_at: startedAt,
+    });
+    if (replaceError) throw new Error("Airbnb calendar events could not be saved. Apply the calendar sync migration first.");
+
+    const activeEvents = Number(activeEventsData ?? 0);
     const syncedAt = new Date().toISOString();
-    const { count: activeEvents } = await admin.from("external_calendar_events")
-      .select("external_uid", { count: "exact", head: true })
-      .eq("provider", "airbnb")
-      .eq("status", "active");
-    await updateSyncState({
+    await updateSyncState(admin, {
       status: "succeeded",
       last_succeeded_at: syncedAt,
       last_error: null,
       events_seen: events.length,
       conflicts_seen: conflictsSeen,
       updated_at: syncedAt,
+    }, lockId);
+    await updateSyncRun(admin, runId, {
+      status: "succeeded",
+      finished_at: syncedAt,
+      events_seen: events.length,
+      conflicts_seen: conflictsSeen,
+      active_events: activeEvents,
+      error_message: null,
     });
-    return { eventsSeen: events.length, conflictsSeen, activeEvents: activeEvents ?? events.length, syncedAt };
+    await releaseSyncLock(admin, lockId);
+    return { eventsSeen: events.length, conflictsSeen, activeEvents, syncedAt };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Airbnb calendar sync failed.";
     const failedAt = new Date().toISOString();
-    await updateSyncState({ status: "failed", last_failed_at: failedAt, last_error: message.slice(0, 240), updated_at: failedAt });
+    if (runId) {
+      try {
+        await updateSyncRun(admin, runId, { status: "failed", finished_at: failedAt, error_message: message.slice(0, 240) });
+      } catch (historyError) {
+        console.error("[airbnb-calendar] failed to record sync history", historyError instanceof Error ? historyError.message : "unknown error");
+      }
+    }
+    try {
+      await updateSyncState(admin, { status: "failed", last_failed_at: failedAt, last_error: message.slice(0, 240), updated_at: failedAt }, lockId);
+    } catch (stateError) {
+      console.error("[airbnb-calendar] failed to record sync status", stateError instanceof Error ? stateError.message : "unknown error");
+    }
+    await releaseSyncLock(admin, lockId);
     throw new Error(message);
   }
 }
 
 export async function getAirbnbSyncStatus(): Promise<AirbnbSyncStatus> {
   const admin = createSupabaseAdminClient();
-  if (!admin) {
-    return { provider: "airbnb", status: "never", lastStartedAt: null, lastSucceededAt: null, lastFailedAt: null, lastError: null, eventsSeen: 0, conflictsSeen: 0, updatedAt: null, activeEvents: 0 };
-  }
+  if (!admin) return emptySyncStatus();
   const { data, error } = await admin.from("external_calendar_sync_state").select("*").eq("provider", "airbnb").maybeSingle();
-  if (error || !data) {
-    return { provider: "airbnb", status: "never", lastStartedAt: null, lastSucceededAt: null, lastFailedAt: null, lastError: null, eventsSeen: 0, conflictsSeen: 0, updatedAt: null, activeEvents: 0 };
-  }
-  const { count } = await admin.from("external_calendar_events").select("external_uid", { count: "exact", head: true }).eq("provider", "airbnb").eq("status", "active");
+  if (error || !data) return emptySyncStatus();
+  const [{ count }, { count: websiteBookings }, { data: runs }] = await Promise.all([
+    admin.from("external_calendar_events").select("external_uid", { count: "exact", head: true }).eq("provider", "airbnb").eq("status", "active"),
+    admin.from("booking_requests").select("id", { count: "exact", head: true }).in("status", ["pending", "contacted", "confirmed"]).gt("check_out", new Date().toISOString().slice(0, 10)),
+    admin.from("external_calendar_sync_runs").select("*").eq("provider", "airbnb").order("started_at", { ascending: false }).limit(8),
+  ]);
+  const status = emptySyncStatus();
   return {
+    ...status,
     provider: "airbnb",
     status: data.status,
     lastStartedAt: data.last_started_at,
     lastSucceededAt: data.last_succeeded_at,
     lastFailedAt: data.last_failed_at,
     lastError: data.last_error,
-    eventsSeen: data.events_seen,
-    conflictsSeen: data.conflicts_seen,
+    eventsSeen: Number(data.events_seen ?? 0),
+    conflictsSeen: Number(data.conflicts_seen ?? 0),
     updatedAt: data.updated_at,
+    syncLockUntil: data.sync_lock_until,
     activeEvents: count ?? 0,
+    websiteBookings: websiteBookings ?? 0,
+    recentRuns: (runs ?? []).map((run) => normalizeRun(run as Record<string, unknown>)),
   };
 }
 
@@ -281,9 +399,10 @@ export async function syncAirbnbCalendarIfStale() {
   const { importUrl } = await getAirbnbImportSource();
   if (!importUrl || !getAirbnbCalendarConfiguration().serviceRoleKey) return;
   const status = await getAirbnbSyncStatus();
+  const lockUntil = status.syncLockUntil ? Date.parse(status.syncLockUntil) : 0;
   const lastSync = status.lastSucceededAt ? Date.parse(status.lastSucceededAt) : 0;
-  if (status.status === "running" || (lastSync > 0 && Date.now() - lastSync < SYNC_STALE_AFTER_MS)) return;
-  await syncAirbnbCalendar();
+  if ((status.status === "running" && lockUntil > Date.now()) || (lastSync > 0 && Date.now() - lastSync < SYNC_STALE_AFTER_MS)) return;
+  await syncAirbnbCalendar({ trigger: "background" });
 }
 
 export async function isAirbnbCalendarConfigured() {

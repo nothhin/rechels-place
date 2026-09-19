@@ -38,6 +38,9 @@ const emptyAirbnbStatus: AirbnbSyncPanelStatus = {
   eventsSeen: 0,
   conflictsSeen: 0,
   activeEvents: 0,
+  websiteBookings: 0,
+  syncLockUntil: null,
+  recentRuns: [],
 };
 const mobileClasses = {
   button: styles.mobileMenu,
@@ -66,6 +69,8 @@ export default async function OperationsPage() {
     ...emptyAirbnbStatus,
     ...rawAirbnbStatus,
     status: rawAirbnbStatus.status ?? "never",
+    syncLockUntil: rawAirbnbStatus.syncLockUntil ?? null,
+    recentRuns: rawAirbnbStatus.recentRuns ?? [],
   };
   const airbnbConfiguration = await isAirbnbCalendarConfigured();
   const active = ops.bookings.filter(

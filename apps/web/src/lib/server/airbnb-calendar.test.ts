@@ -23,8 +23,20 @@ describe("Airbnb iCal calendar parser", () => {
     ].join("\r\n"));
 
     expect(events).toEqual([
-      { externalUid: "airbnb-123", checkIn: "2026-11-26", checkOut: "2026-11-30" },
-      { externalUid: "airbnb-folded", checkIn: "2026-12-01", checkOut: "2026-12-02" },
+      {
+        externalUid: "airbnb-123",
+        checkIn: "2026-11-26",
+        checkOut: "2026-11-30",
+        summary: "Reserved",
+        sourceStatus: "UNKNOWN",
+      },
+      {
+        externalUid: "airbnb-folded",
+        checkIn: "2026-12-01",
+        checkOut: "2026-12-02",
+        summary: "Reserved for a very long guestdescription",
+        sourceStatus: "UNKNOWN",
+      },
     ]);
   });
 
@@ -58,7 +70,88 @@ describe("Airbnb iCal calendar parser", () => {
       "END:VCALENDAR",
     ].join("\n"));
 
-    expect(events).toEqual([{ externalUid: "one-night", checkIn: "2026-11-26", checkOut: "2026-11-27" }]);
+    expect(events).toEqual([{
+      externalUid: "one-night",
+      checkIn: "2026-11-26",
+      checkOut: "2026-11-27",
+      summary: "Unavailable",
+      sourceStatus: "UNKNOWN",
+    }]);
+  });
+
+  it("accepts a valid empty calendar so disappeared events can be released", () => {
+    expect(parseAirbnbCalendar([
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "END:VCALENDAR",
+    ].join("\r\n"))).toEqual([]);
+  });
+
+  it("keeps status and description metadata without exposing it in the export", () => {
+    const [event] = parseAirbnbCalendar([
+      "BEGIN:VCALENDAR",
+      "BEGIN:VEVENT",
+      "UID:metadata-event",
+      "DTSTART;VALUE=DATE:20261126",
+      "DTEND;VALUE=DATE:20261128",
+      "SUMMARY:Reserved",
+      "DESCRIPTION:Private source note",
+      "STATUS:CONFIRMED",
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\n"));
+
+    expect(event).toMatchObject({
+      externalUid: "metadata-event",
+      summary: "Reserved",
+      description: "Private source note",
+      sourceStatus: "CONFIRMED",
+    });
+  });
+
+  it("returns one row for a repeated external UID", () => {
+    const events = parseAirbnbCalendar([
+      "BEGIN:VCALENDAR",
+      "BEGIN:VEVENT",
+      "UID:repeated-event",
+      "DTSTART;VALUE=DATE:20261126",
+      "DTEND;VALUE=DATE:20261127",
+      "END:VEVENT",
+      "BEGIN:VEVENT",
+      "UID:repeated-event",
+      "DTSTART;VALUE=DATE:20261126",
+      "DTEND;VALUE=DATE:20261128",
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\n"));
+
+    expect(events).toHaveLength(1);
+    expect(events[0]?.externalUid).toBe("repeated-event");
+  });
+
+  it("skips one malformed event without discarding valid events", () => {
+    const events = parseAirbnbCalendar([
+      "BEGIN:VCALENDAR",
+      "BEGIN:VEVENT",
+      "UID:valid-event",
+      "DTSTART;VALUE=DATE:20261126",
+      "DTEND;VALUE=DATE:20261127",
+      "END:VEVENT",
+      "BEGIN:VEVENT",
+      "UID:malformed-event",
+      "DTSTART;VALUE=DATE:not-a-date",
+      "DTEND;VALUE=DATE:20261129",
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\n"));
+
+    expect(events).toEqual([{
+      externalUid: "valid-event",
+      checkIn: "2026-11-26",
+      checkOut: "2026-11-27",
+      summary: "Unavailable",
+      sourceStatus: "UNKNOWN",
+    }]);
   });
 
   it("compares export tokens without accepting a different token", () => {

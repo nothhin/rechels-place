@@ -34,6 +34,10 @@ export function createAirbnbCalendarAdapter(
           throw new Error("Airbnb calendar feed is too large.");
         }
         return parseAirbnbCalendar(await response.text());
+      } catch (error) {
+        if (error instanceof Error && (error.message.startsWith("Airbnb calendar returned HTTP") || error.message.startsWith("Airbnb calendar feed"))) throw error;
+        if (controller.signal.aborted) throw new Error("Airbnb calendar request timed out.");
+        throw new Error("Airbnb calendar could not be reached.");
       } finally {
         clearTimeout(timeout);
       }
