@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { normalizeAirbnbIcalUrl } from "./airbnb-calendar-url";
 import { airbnbCalendarAdapter } from "./airbnb-calendar-adapter";
+import { serializeAirbnbCalendarEvents } from "./airbnb-calendar-payload";
 export { isAirbnbExportTokenValid, parseAirbnbCalendar } from "./airbnb-calendar-parser";
 
 const SYNC_STALE_AFTER_MS = 15 * 60 * 1_000;
@@ -321,7 +322,10 @@ export async function syncAirbnbCalendar(options: { trigger?: AirbnbSyncTrigger 
       { check_in: range.checkIn, check_out: range.checkOut },
     ))).length;
     const { data: activeEventsData, error: replaceError } = await admin.rpc("replace_snowaz_airbnb_events", {
-      p_events: events,
+      // The SQL RPC consumes snake_case jsonb keys. Do not pass the parser's
+      // camelCase objects directly: jsonb_to_recordset would silently filter
+      // every row as null and report a successful zero-event replacement.
+      p_events: serializeAirbnbCalendarEvents(events),
       p_seen_at: startedAt,
     });
     if (replaceError) throw new Error("Airbnb calendar events could not be saved. Apply the calendar sync migration first.");
