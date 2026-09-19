@@ -14,7 +14,7 @@ export function getAdminBootstrapConfig(
   const enabled = environment.ADMIN_BOOTSTRAP_ENABLED?.trim().toLowerCase() === "true";
 
   return {
-    enabled: enabled && Boolean(email) && Boolean(secret && secret.length >= 32),
+    enabled: enabled && Boolean(secret && secret.length >= 32),
     email,
     secret,
   };
