@@ -4,12 +4,12 @@ import { useActionState } from "react";
 import { registerBootstrapAdmin } from "./actions";
 import styles from "../login/login.module.css";
 
-export function RegisterForm({ email }: { email: string }) {
+export function RegisterForm({ email }: { email: string | null }) {
   const [state, action, pending] = useActionState(registerBootstrapAdmin, undefined);
   return <form action={action} className={styles.form}>
     <label>
       <span>Owner email</span>
-      <input name="email" type="email" value={email} readOnly autoComplete="username" />
+      <input name="email" type="email" defaultValue={email ?? ""} readOnly={Boolean(email)} placeholder="owner@example.com" autoComplete="username" required />
     </label>
     <label>
       <span>Create password</span>

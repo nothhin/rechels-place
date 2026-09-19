@@ -50,7 +50,7 @@ export async function registerBootstrapAdmin(
   formData: FormData,
 ): Promise<BootstrapActionState> {
   const config = getAdminBootstrapConfig();
-  if (!config.enabled || !config.email || !config.secret) return invalidSetup();
+  if (!config.enabled || !config.secret) return invalidSetup();
 
   const parsed = registrationSchema.safeParse({
     email: formData.get("email"),
@@ -66,7 +66,7 @@ export async function registerBootstrapAdmin(
   }
 
   const email = parsed.data.email.toLowerCase();
-  if (email !== config.email || !matchesAdminBootstrapSecret(parsed.data.setupSecret, config.secret)) {
+  if ((config.email && email !== config.email) || !matchesAdminBootstrapSecret(parsed.data.setupSecret, config.secret)) {
     return invalidSetup();
   }
 

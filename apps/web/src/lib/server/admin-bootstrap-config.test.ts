@@ -5,7 +5,7 @@ import {
 } from "./admin-bootstrap-config";
 
 describe("admin bootstrap configuration", () => {
-  it("requires the explicit flag, owner email, and a long secret", () => {
+  it("requires the explicit flag and a long secret, while normalizing an optional email restriction", () => {
     expect(getAdminBootstrapConfig({
       ADMIN_BOOTSTRAP_ENABLED: "true",
       ADMIN_BOOTSTRAP_EMAIL: " Rechel@Gmail.com ",
@@ -13,6 +13,17 @@ describe("admin bootstrap configuration", () => {
     })).toEqual({
       enabled: true,
       email: "rechel@gmail.com",
+      secret: "a".repeat(32),
+    });
+  });
+
+  it("allows the owner to choose an email when no restriction is configured", () => {
+    expect(getAdminBootstrapConfig({
+      ADMIN_BOOTSTRAP_ENABLED: "true",
+      ADMIN_BOOTSTRAP_SECRET: "a".repeat(32),
+    })).toEqual({
+      enabled: true,
+      email: null,
       secret: "a".repeat(32),
     });
   });

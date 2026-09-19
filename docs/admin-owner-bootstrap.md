@@ -8,11 +8,17 @@ Set these Vercel variables for **Production**:
 
 ```text
 ADMIN_BOOTSTRAP_ENABLED=true
-ADMIN_BOOTSTRAP_EMAIL=rechel@gmail.com
+ADMIN_BOOTSTRAP_EMAIL=
 ADMIN_BOOTSTRAP_SECRET=<a separate random secret with at least 32 characters>
 ```
 
-The existing `NEXT_PUBLIC_SUPABASE_URL` and
+`ADMIN_BOOTSTRAP_EMAIL` is optional. Leave it blank when the owner should
+choose her email in the setup form; set it only when registration must be
+restricted to one known address.
+
+The setup secret is the only gate when no email restriction is configured, so
+share it privately with the owner and never publish it. The existing
+`NEXT_PUBLIC_SUPABASE_URL` and
 `SUPABASE_SERVICE_ROLE_KEY` are also required. Open
 `/admin/login`, select **One-time owner setup**, enter the owner password and
 setup code, then sign in normally. The server creates or links the Supabase
