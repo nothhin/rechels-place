@@ -18,5 +18,8 @@
 .form button:hover { background:#8b642c; }
 .form button:disabled { opacity:.65; }
 .error { padding:12px 14px; border-radius:10px; background:#fff0ed; color:#9c3f2e; font-size:11px; line-height:1.5; }
+.success { padding:12px 14px; border-radius:10px; background:#edf8f0; color:#28734d; font-size:11px; line-height:1.5; }
+.warning { margin:24px 0 0; padding:12px 14px; border:1px solid #e7c47f; border-radius:10px; background:#fff8e7; color:#73551f; font-size:11px; line-height:1.6; }
+.bootstrapLink,.backLink { display:block; margin-top:18px; color:#8b642c; font-size:11px; font-weight:800; text-align:center; text-decoration:underline; text-underline-offset:3px; }
 .help { display:block; margin-top:24px; color:#8b8178; font-size:9px; line-height:1.7; }
 @media (max-width:520px) { .shell { align-items:end; padding:0; } .card { width:100%; border-radius:24px 24px 0 0; padding:34px 22px calc(30px + env(safe-area-inset-bottom)); } .copy { margin:38px 0 24px; } .copy h1 { font-size:46px; } }
