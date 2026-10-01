@@ -9,6 +9,12 @@ import {
 } from "@/lib/server/deposit-token";
 import { createPublicSupabaseClient } from "@/lib/supabase/public-server";
 
+const phpCurrency = new Intl.NumberFormat("en-PH", {
+  style: "currency",
+  currency: "PHP",
+  maximumFractionDigits: 0,
+});
+
 export type BookingActionState = {
   status: "idle" | "success" | "error" | "stale";
   message?: string;
@@ -94,10 +100,59 @@ async function saveBookingRequest(formData: FormData) {
     const result = {
       bookingReference: booking.booking_reference as string,
       depositExpiresAt: booking.deposit_expires_at as string,
+      totalMinor: Number(
+        booking.current_total_minor ?? parsed.data.clientTotalMinor ?? 0,
+      ),
     };
 
+    const webhookUrl = process.env.N8N_BOOKING_WEBHOOK_URL;
     const notificationEmail = process.env.BOOKING_NOTIFICATION_EMAIL;
-    if (notificationEmail) {
+    let notificationDelivered = false;
+    const checkInTime = Date.parse(`${parsed.data.checkIn}T00:00:00Z`);
+    const checkOutTime = Date.parse(`${parsed.data.checkOut}T00:00:00Z`);
+    const nights = Math.round((checkOutTime - checkInTime) / 86_400_000);
+    const notificationPayload = {
+      bookingReference: result.bookingReference,
+      guestName: parsed.data.fullName,
+      guestEmail: parsed.data.email || "Not provided",
+      guestPhone: parsed.data.phone,
+      checkIn: parsed.data.checkIn,
+      checkOut: parsed.data.checkOut,
+      nights,
+      adults: parsed.data.adults,
+      children: parsed.data.children,
+      parking:
+        parsed.data.parkingType === "car"
+          ? "Car"
+          : parsed.data.parkingType === "motorcycle"
+            ? "Motorcycle"
+            : "None",
+      total: phpCurrency.format(result.totalMinor / 100),
+      depositDue: phpCurrency.format(result.totalMinor / 200),
+      specialRequests: parsed.data.specialRequests || "None",
+    };
+
+    if (webhookUrl) {
+      try {
+        const webhookResponse = await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(notificationPayload),
+          cache: "no-store",
+        });
+        notificationDelivered = webhookResponse.ok;
+        if (!webhookResponse.ok)
+          console.warn("[booking-request] n8n rejected the notification", {
+            status: webhookResponse.status,
+          });
+      } catch {
+        console.warn(
+          "[booking-request] n8n notification failed; trying the email fallback",
+        );
+      }
+    }
+
+    if (!notificationDelivered && notificationEmail) {
       try {
         const notificationResponse = await fetch(
           `https://formsubmit.co/ajax/${encodeURIComponent(notificationEmail)}`,
@@ -109,17 +164,20 @@ async function saveBookingRequest(formData: FormData) {
             },
             body: JSON.stringify({
               _subject: `New Rechel's Place booking request - ${result.bookingReference}`,
-              name: parsed.data.fullName,
-              email: parsed.data.email || "Not provided",
-              phone: parsed.data.phone,
+              name: notificationPayload.guestName,
+              email: notificationPayload.guestEmail,
+              phone: notificationPayload.guestPhone,
               contact_method: "Phone call",
-              check_in: parsed.data.checkIn,
-              check_out: parsed.data.checkOut,
+              check_in: notificationPayload.checkIn,
+              check_out: notificationPayload.checkOut,
               guests: parsed.data.guests,
-              adults: parsed.data.adults,
-              children: parsed.data.children,
+              adults: notificationPayload.adults,
+              children: notificationPayload.children,
               bedroom_selection: bedroomLabel,
-              special_requests: parsed.data.specialRequests || "None",
+              total: notificationPayload.total,
+              deposit_due: notificationPayload.depositDue,
+              parking: notificationPayload.parking,
+              special_requests: notificationPayload.specialRequests,
             }),
           },
         );
