@@ -147,7 +147,7 @@ export default async function AdminDashboard({
             <Link href="#booking-requests"><span aria-hidden="true">＋</span><small>Booking requests</small></Link>
             <Link href="#calendar"><span aria-hidden="true">▣</span><small>Block dates</small></Link>
             <Link href="/admin/confirmed"><span aria-hidden="true">✓</span><small>Upcoming guests</small></Link>
-            <Link href="/admin/pricing"><span aria-hidden="true">₱</span><small>Rates & fees</small></Link>
+            <Link href="/admin/settings"><span aria-hidden="true">•••</span><small>Settings</small></Link>
           </section>
           <section className={styles.attentionPanel} aria-labelledby="attention-title">
             <div className={styles.attentionHeader}>

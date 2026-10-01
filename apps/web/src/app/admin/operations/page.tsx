@@ -9,16 +9,10 @@ import { AdminLiveRefresh } from "../AdminLiveRefresh";
 import { AdminBottomNav, AdminMobileNav, AdminNav } from "../AdminNav";
 import {
   BookingOperations,
-  DateBlocks,
   NotificationQueue,
-  type DateBlock,
   type OpsBooking,
   type OpsNotification,
 } from "./OperationsClient";
-import AirbnbCalendarSyncPanel, {
-  type AirbnbSyncPanelStatus,
-} from "./AirbnbCalendarSyncPanel";
-import { isAirbnbCalendarConfigured } from "@/lib/server/airbnb-calendar";
 import styles from "../admin.module.css";
 export const metadata: Metadata = {
   title: "Payments & tasks | Rechel's Place",
@@ -27,20 +21,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 type Operations = {
   bookings: OpsBooking[];
-  blocks: DateBlock[];
   notifications: OpsNotification[];
-};
-const emptyAirbnbStatus: AirbnbSyncPanelStatus = {
-  status: "never",
-  lastSucceededAt: null,
-  lastFailedAt: null,
-  lastError: null,
-  eventsSeen: 0,
-  conflictsSeen: 0,
-  activeEvents: 0,
-  websiteBookings: 0,
-  syncLockUntil: null,
-  recentRuns: [],
 };
 const mobileClasses = {
   button: styles.mobileMenu,
@@ -63,16 +44,6 @@ export default async function OperationsPage() {
   if (error || !data) console.error("[admin-operations] load failed", { code: error?.code ?? "missing-data" });
   if (error || !data) throw new Error("Operations data is unavailable.");
   const ops = data as Operations;
-  const { data: airbnbStatusData } = await supabase.rpc("staff_get_snowaz_airbnb_sync_status");
-  const rawAirbnbStatus = (airbnbStatusData ?? {}) as Partial<AirbnbSyncPanelStatus>;
-  const airbnbStatus: AirbnbSyncPanelStatus = {
-    ...emptyAirbnbStatus,
-    ...rawAirbnbStatus,
-    status: rawAirbnbStatus.status ?? "never",
-    syncLockUntil: rawAirbnbStatus.syncLockUntil ?? null,
-    recentRuns: rawAirbnbStatus.recentRuns ?? [],
-  };
-  const airbnbConfiguration = await isAirbnbCalendarConfigured();
   const active = ops.bookings.filter(
     (item) => !["cancelled", "declined"].includes(item.bookingStatus),
   );
@@ -132,8 +103,7 @@ export default async function OperationsPage() {
               <p className={styles.eyebrow}>Rechel’s Place control center</p>
               <h1>Payments & tasks.</h1>
               <p>
-                Review stays, verify guests, record payments, block dates, and
-                track follow-ups from one workspace.
+                Review stays, record payments, and track guest follow-ups.
               </p>
             </div>
             <div className={styles.liveBadge}>
@@ -180,14 +150,7 @@ export default async function OperationsPage() {
             ))}
           </section>
           <BookingOperations bookings={ops.bookings} />
-          <AirbnbCalendarSyncPanel
-            status={airbnbStatus}
-            importConfigured={airbnbConfiguration.importConfigured}
-            exportConfigured={airbnbConfiguration.exportConfigured}
-            importSource={airbnbConfiguration.importSource}
-          />
           <div className={styles.operationsLowerGrid}>
-            <DateBlocks blocks={ops.blocks} />
             <NotificationQueue notifications={ops.notifications} />
           </div>
           <footer className={styles.operationsFooter}>
