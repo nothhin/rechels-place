@@ -17,7 +17,7 @@ export async function confirmAction(title: string, text: string, confirmButtonTe
 }
 
 export function showSuccess(message: string) {
-  return Swal.fire({ toast: true, position: "top-end", icon: "success", title: message, showConfirmButton: false, timer: 3200, timerProgressBar: true, customClass: { popup: "snowaz-toast" } });
+  return Swal.fire({ toast: true, position: "top-end", icon: "success", title: message, showConfirmButton: false, timer: 1800, timerProgressBar: true, customClass: { popup: "snowaz-toast" } });
 }
 
 export function showError(message: string) {
