@@ -566,6 +566,26 @@ h3 {
   font-weight: 800;
   text-align: right;
 }
+.booking-receipt-contact dd {
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+}
+.booking-receipt-contact dd span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.booking-receipt-money dd {
+  white-space: nowrap;
+}
+.booking-receipt dt small {
+  display: inline-block;
+  margin-top: 4px;
+  color: #8a7a6d;
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.45;
+}
 .booking-receipt .booking-receipt-total {
   margin-top: 5px;
   padding-top: 14px;
@@ -627,6 +647,36 @@ h3 {
     padding: 5px 8px;
     font-size: 8px;
     white-space: nowrap;
+  }
+  .booking-receipt dl {
+    padding: 10px 12px 14px;
+  }
+  .booking-receipt dl div {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    align-items: start;
+    gap: 8px 14px;
+    padding: 12px 0;
+  }
+  .booking-receipt dt,
+  .booking-receipt dd {
+    min-width: 0;
+    line-height: 1.45;
+  }
+  .booking-receipt dd {
+    max-width: none;
+  }
+  .booking-receipt-detail {
+    grid-template-columns: 1fr !important;
+  }
+  .booking-receipt-detail dd {
+    text-align: left;
+  }
+  .booking-receipt-contact dd {
+    justify-items: end;
+  }
+  .booking-receipt-security {
+    grid-template-columns: minmax(0, 1fr) auto !important;
   }
 }
 
