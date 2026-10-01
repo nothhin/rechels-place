@@ -46,6 +46,8 @@ export type OpsBooking = {
   checkIn: string;
   checkOut: string;
   guestCount: number;
+  adultCount?: number;
+  childCount?: number;
   bedroomChoice: string;
   bookingStatus: string;
   stayStatus: string;
@@ -347,8 +349,7 @@ export function BookingOperations({ bookings }: { bookings: OpsBooking[] }) {
                 </header>
                 <p>
                   {formatStayRange(booking.checkIn, booking.checkOut)} ·{" "}
-                  {booking.guestCount} guest
-                  {booking.guestCount === 1 ? "" : "s"}
+                  {booking.adultCount ?? booking.guestCount} adults · {booking.childCount ?? 0} children
                 </p>
                 <dl>
                   <div>

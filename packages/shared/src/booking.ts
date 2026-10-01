@@ -3,6 +3,9 @@ import type { RechelsPricingConfig } from "./pricing";
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MILLISECONDS_PER_DAY = 86_400_000;
+export const MAX_ADULTS = 6;
+export const MAX_CHILDREN = 3;
+export const MAX_GUESTS = MAX_ADULTS + MAX_CHILDREN;
 export const bedroomChoiceSchema = z.enum([
   "bedroom_1",
   "bedroom_2",
@@ -38,7 +41,7 @@ export const staySchema = z
   });
 
 export const availabilitySearchSchema = staySchema.extend({
-  guests: z.coerce.number().int().min(1).max(6),
+  guests: z.coerce.number().int().min(1).max(MAX_GUESTS),
 });
 
 export const guestDetailsSchema = z.object({
@@ -49,7 +52,7 @@ export const guestDetailsSchema = z.object({
 
 export const reservationRequestSchema = staySchema.extend({
   roomTypeId: z.string().uuid(),
-  guests: z.coerce.number().int().min(1).max(6),
+  guests: z.coerce.number().int().min(1).max(MAX_GUESTS),
   guest: guestDetailsSchema,
   specialRequests: z.string().trim().max(1_000).optional().or(z.literal("")),
   consent: z.literal(true, {
@@ -61,7 +64,9 @@ export const reservationRequestSchema = staySchema.extend({
 
 export const bookingEnquirySchema = staySchema.extend({
     roomTypeId: z.string().uuid().optional().or(z.literal("")),
-    guests: z.coerce.number().int().min(1).max(6),
+    adults: z.coerce.number().int().min(1).max(MAX_ADULTS),
+    children: z.coerce.number().int().min(0).max(MAX_CHILDREN),
+    guests: z.coerce.number().int().min(1).max(MAX_GUESTS),
     bedroomChoice: z.literal("both_bedrooms"),
     parkingType: parkingTypeSchema.default("none"),
     earlyCheckInHours: z.coerce.number().int().min(0).max(5).default(0),
@@ -81,6 +86,14 @@ export const bookingEnquirySchema = staySchema.extend({
     pricingVersion: z.string().trim().max(64).optional().or(z.literal("")),
     clientTotalMinor: z.coerce.number().int().min(0).optional().or(z.literal("")),
     website: z.string().max(0).optional().or(z.literal("")),
+  }).superRefine(({ adults, children, guests }, context) => {
+    if (adults + children !== guests) {
+      context.addIssue({
+        code: "custom",
+        path: ["guests"],
+        message: "The total guest count must match the adults and children selected.",
+      });
+    }
   });
 
 export type BedroomChoice = z.infer<typeof bedroomChoiceSchema>;
@@ -136,8 +149,8 @@ export function calculateStayTotalMinor(
 }
 
 function validateGuestCount(guests: number) {
-  if (!Number.isSafeInteger(guests) || guests < 1 || guests > 6) {
-    throw new RangeError("Guest count must be a whole number from 1 to 6.");
+  if (!Number.isSafeInteger(guests) || guests < 1 || guests > MAX_GUESTS) {
+    throw new RangeError(`Guest count must be a whole number from 1 to ${MAX_GUESTS}.`);
   }
 }
 
@@ -202,8 +215,8 @@ export function calculateRechelsPlaceTimeExtensionFeeMinor(
 }
 
 export function automaticBedroomChoice(guests: number) {
-  if (!Number.isSafeInteger(guests) || guests < 1 || guests > 6)
-    throw new RangeError("Guest count must be a whole number from 1 to 6.");
+  if (!Number.isSafeInteger(guests) || guests < 1 || guests > MAX_GUESTS)
+    throw new RangeError(`Guest count must be a whole number from 1 to ${MAX_GUESTS}.`);
   return guests <= 2
     ? ("bedroom_1" as const)
     : ("bedroom_2" as const);

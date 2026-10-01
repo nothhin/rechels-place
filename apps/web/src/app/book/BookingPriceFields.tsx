@@ -20,7 +20,9 @@ export default function BookingPriceFields({
 }: BookingPriceFieldsProps) {
   const [checkIn, setCheckIn] = useState(initialCheckIn);
   const [checkOut, setCheckOut] = useState(initialCheckOut);
-  const [guests, setGuests] = useState(() => Math.min(6, Math.max(1, Number(initialGuests) || 2)));
+  const [adults, setAdults] = useState(() => Math.min(6, Math.max(1, Number(initialGuests) || 2)));
+  const [children, setChildren] = useState(0);
+  const guests = adults + children;
 
   return (
     <>
@@ -43,24 +45,35 @@ export default function BookingPriceFields({
         <div className={`${styles.roomChoiceActive} ${styles.roomOption}`}>
           <span>
             <strong>Entire two-bedroom condo</strong>
-            <small>2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests</small>
+            <small>2 bedrooms · 5 beds · 2.5 baths · Up to 6 adults + 3 children</small>
           </span>
           <b>{pricing ? formatPhpMinor(pricing.wholeCondoNightlyRateMinor) : "Current rate"}/night</b>
         </div>
       </fieldset>
       <label>
-        <span>Number of guests</span>
-        <select name="guests" value={guests} onChange={(event) => setGuests(Number(event.target.value))} required>
+        <span>Adults</span>
+        <select name="adults" value={adults} onChange={(event) => setAdults(Number(event.target.value))} required>
           {Array.from({ length: 6 }, (_, index) => index + 1).map((guestCount) => (
             <option key={guestCount} value={guestCount}>
-              {guestCount} guest{guestCount === 1 ? "" : "s"}
+              {guestCount} adult{guestCount === 1 ? "" : "s"}
             </option>
           ))}
         </select>
-        <small>Current Airbnb listing capacity: up to 6 guests.</small>
       </label>
+      <label>
+        <span>Children</span>
+        <select name="children" value={children} onChange={(event) => setChildren(Number(event.target.value))} required>
+          {Array.from({ length: 4 }, (_, index) => index).map((childCount) => (
+            <option key={childCount} value={childCount}>
+              {childCount} child{childCount === 1 ? "" : "ren"}
+            </option>
+          ))}
+        </select>
+        <small>Maximum occupancy: 6 adults plus 3 children.</small>
+      </label>
+      <input type="hidden" name="guests" value={guests} />
       <p className={styles.note}>Current rate: {pricing ? formatPhpMinor(pricing.wholeCondoNightlyRateMinor) : "the configured rate"}/night. A {pricing ? formatPricingPercent(pricing.downPaymentPercent) : "configured"} down payment secures the accommodation balance, and the separate {pricing ? formatPhpMinor(pricing.refundableSecurityDepositMinor) : "refundable security deposit"} is due upon check-in on that day. Free street parking is listed on Airbnb; ask Rechel about arrival details when you send your request.</p>
-      <BookingPriceReceipt checkIn={checkIn} checkOut={checkOut} guests={guests} bedroomChoice="both_bedrooms" parkingType="none" pricing={pricing} />
+      <BookingPriceReceipt checkIn={checkIn} checkOut={checkOut} guests={guests} adults={adults} childCount={children} bedroomChoice="both_bedrooms" parkingType="none" pricing={pricing} />
     </>
   );
 }

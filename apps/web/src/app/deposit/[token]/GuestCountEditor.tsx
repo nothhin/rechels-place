@@ -15,7 +15,8 @@ export function GuestCountEditor({
   token,
   checkIn,
   checkOut,
-  initialGuests,
+  initialAdults,
+  initialChildren,
   bookingReference,
   customerName,
   customerEmail,
@@ -28,7 +29,8 @@ export function GuestCountEditor({
   token: string;
   checkIn: string;
   checkOut: string;
-  initialGuests: number;
+  initialAdults: number;
+  initialChildren: number;
   initialBedroom: string;
   initialParking: "none" | "car" | "motorcycle";
   initialEarlyCheckInHours: number;
@@ -42,10 +44,13 @@ export function GuestCountEditor({
   pricing: RechelsPricingConfig | null;
   bookingSnapshot: BookingPriceSnapshot;
 }) {
-  const [guests, setGuests] = useState(Math.min(6, Math.max(1, initialGuests)));
+  const [adults, setAdults] = useState(Math.min(6, Math.max(1, initialAdults)));
+  const [children, setChildren] = useState(Math.min(3, Math.max(0, initialChildren)));
+  const guests = adults + children;
   const router = useRouter();
   const [state, action, pending] = useActionState(updatePendingGuestCount, initialState);
-  const previewSnapshot = guests === initialGuests ? bookingSnapshot : undefined;
+  const unchanged = adults === initialAdults && children === initialChildren;
+  const previewSnapshot = unchanged ? bookingSnapshot : undefined;
 
   useEffect(() => {
     if (state.status === "success") {
@@ -69,26 +74,39 @@ export function GuestCountEditor({
         <input type="hidden" name="earlyCheckInHours" value="0" />
         <input type="hidden" name="lateCheckoutHours" value="0" />
         <label>
-          <span>Number of guests</span>
-          <select name="guests" value={guests} onChange={(event) => setGuests(Number(event.target.value))}>
+          <span>Adults</span>
+          <select name="adults" value={adults} onChange={(event) => setAdults(Number(event.target.value))}>
             {Array.from({ length: 6 }, (_, index) => index + 1).map((count) => (
               <option key={count} value={count}>
-                {count} guest{count === 1 ? "" : "s"}
+                {count} adult{count === 1 ? "" : "s"}
               </option>
             ))}
           </select>
         </label>
+        <label>
+          <span>Children</span>
+          <select name="children" value={children} onChange={(event) => setChildren(Number(event.target.value))}>
+            {Array.from({ length: 4 }, (_, index) => index).map((count) => (
+              <option key={count} value={count}>
+                {count} child{count === 1 ? "" : "ren"}
+              </option>
+            ))}
+          </select>
+        </label>
+        <input type="hidden" name="guests" value={guests} />
         <div className={styles.editorNote}>
           <strong>Entire two-bedroom condo</strong>
-          <span>2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests</span>
+          <span>2 bedrooms · 5 beds · 2.5 baths · Up to 6 adults + 3 children</span>
           <span>Free street parking is listed on Airbnb. Ask Rechel to confirm building and arrival details.</span>
         </div>
-        <button disabled={pending || guests === initialGuests}>{pending ? "Updating…" : guests === initialGuests ? "Choose a different guest count" : "Update guests and total"}</button>
+        <button disabled={pending || unchanged}>{pending ? "Updating…" : unchanged ? "Choose a different occupancy" : "Update occupancy"}</button>
       </form>
       <BookingPriceReceipt
         checkIn={checkIn}
         checkOut={checkOut}
         guests={guests}
+        adults={adults}
+        childCount={children}
         bedroomChoice="both_bedrooms"
         parkingType="none"
         bookingReference={bookingReference}

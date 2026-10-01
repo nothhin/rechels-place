@@ -49,7 +49,7 @@ export default async function AdminDashboard({
   const staff = await requireStaff();
   const params = await searchParams;
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.rpc("get_snowaz_admin_dashboard");
+  const { data, error } = await supabase.rpc("get_rechels_admin_dashboard_v2");
   if (error || !data) throw new Error("Admin data is unavailable.");
   const { enquiries } = data as DashboardData;
   const { data: calendarData, error: calendarError } = await supabase.rpc(

@@ -47,7 +47,9 @@ export default function BookingModal({
   const idempotencyInputRef = useRef<HTMLInputElement>(null);
   const [selectedCheckIn, setSelectedCheckIn] = useState(checkIn);
   const [selectedCheckOut, setSelectedCheckOut] = useState(checkOut);
-  const [guests, setGuests] = useState(2);
+  const [adults, setAdults] = useState(2);
+  const [children, setChildren] = useState(0);
+  const guests = adults + children;
   const [bedroomChoice] = useState<"both_bedrooms">("both_bedrooms");
   const [parkingType] = useState<"none">("none");
   const [earlyCheckInHours] = useState(0);
@@ -155,8 +157,10 @@ export default function BookingModal({
     selectedCheckOut,
   ]);
 
-  const adjustGuests = (change: number) =>
-    setGuests((value) => Math.min(6, Math.max(1, value + change)));
+  const adjustAdults = (change: number) =>
+    setAdults((value) => Math.min(6, Math.max(1, value + change)));
+  const adjustChildren = (change: number) =>
+    setChildren((value) => Math.min(3, Math.max(0, value + change)));
 
   return (
     <div
@@ -307,7 +311,7 @@ export default function BookingModal({
                     <div className="selected">
                       <span>
                         <strong>Entire two-bedroom condo</strong>
-                        <small>2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests</small>
+                        <small>2 bedrooms · 5 beds · 2.5 baths · Up to 6 adults + 3 children</small>
                       </span>
                       <b>{livePricing ? formatPhpMinor(livePricing.wholeCondoNightlyRateMinor) : "Current rate"}/night</b>
                     </div>
@@ -354,31 +358,44 @@ export default function BookingModal({
                   </h3>
                   <div className="booking-guest-row">
                     <div>
-                      <strong>Guests</strong>
-                      <small>Final occupancy confirmed by host</small>
+                      <strong>Adults</strong>
+                      <small>Maximum 6 adults</small>
                     </div>
                     <div>
                       <button
                         type="button"
-                        aria-label="Remove guest"
-                        onClick={() => adjustGuests(-1)}
+                        aria-label="Remove adult"
+                        onClick={() => adjustAdults(-1)}
                       >
                         −
                       </button>
-                      <output>{guests}</output>
+                      <output>{adults}</output>
                       <button
                         type="button"
-                        aria-label="Add guest"
-                        onClick={() => adjustGuests(1)}
+                        aria-label="Add adult"
+                        onClick={() => adjustAdults(1)}
                       >
                         +
                       </button>
                     </div>
+                    <input type="hidden" name="adults" value={adults} />
+                  </div>
+                  <div className="booking-guest-row">
+                    <div>
+                      <strong>Children</strong>
+                      <small>Maximum 3 children</small>
+                    </div>
+                    <div>
+                      <button type="button" aria-label="Remove child" onClick={() => adjustChildren(-1)}>−</button>
+                      <output>{children}</output>
+                      <button type="button" aria-label="Add child" onClick={() => adjustChildren(1)}>+</button>
+                    </div>
+                    <input type="hidden" name="children" value={children} />
                     <input type="hidden" name="guests" value={guests} />
                   </div>
                   <div className="booking-selected-room-copy">
                     <strong>Entire two-bedroom condo</strong>
-                    <small>2 bedrooms · 5 beds · 2.5 baths · Maximum 6 guests</small>
+                    <small>{adults} adult{adults === 1 ? "" : "s"} + {children} child{children === 1 ? "" : "ren"} · Maximum 6 adults + 3 children</small>
                   </div>
                 </section>
                 <section className="booking-parking-section">
@@ -470,6 +487,8 @@ export default function BookingModal({
                     checkIn={selectedCheckIn}
                     checkOut={selectedCheckOut}
                     guests={guests}
+                    adults={adults}
+                    childCount={children}
                     bedroomChoice={bedroomChoice}
                     parkingType={parkingType}
                     earlyCheckInHours={earlyCheckInHours}

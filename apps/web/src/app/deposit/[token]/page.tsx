@@ -58,6 +58,8 @@ export default async function DepositPage({
         checkIn: row.check_in as string,
         checkOut: row.check_out as string,
         guestCount: row.guest_count as number,
+        adultCount: Number(row.adult_count ?? row.guest_count ?? 1),
+        childCount: Number(row.child_count ?? 0),
         bedroomChoice: row.bedroom_choice as string,
         parkingType: row.parking_type as "none" | "car" | "motorcycle",
         earlyCheckInHours: Number(row.early_check_in_hours ?? 0),
@@ -143,7 +145,7 @@ export default async function DepositPage({
           <strong>{request.fullName}</strong>
           <span>
             {formatStayRange(request.checkIn, request.checkOut)} ·{" "}
-            {request.guestCount} guest{request.guestCount === 1 ? "" : "s"}
+            {request.adultCount} adult{request.adultCount === 1 ? "" : "s"} · {request.childCount} child{request.childCount === 1 ? "" : "ren"}
           </span>
         </div>
         <DeviceStatusAlerts status={request.depositStatus} />
@@ -152,7 +154,8 @@ export default async function DepositPage({
             token={token}
             checkIn={request.checkIn}
             checkOut={request.checkOut}
-            initialGuests={request.guestCount}
+            initialAdults={request.adultCount}
+            initialChildren={request.childCount}
             initialBedroom={request.bedroomChoice}
             initialParking={request.parkingType}
             initialEarlyCheckInHours={request.earlyCheckInHours}
@@ -171,6 +174,8 @@ export default async function DepositPage({
             checkIn={request.checkIn}
             checkOut={request.checkOut}
             guests={request.guestCount}
+            adults={request.adultCount}
+            childCount={request.childCount}
             bedroomChoice={request.bedroomChoice as "bedroom_1" | "bedroom_2" | "both_bedrooms"}
             parkingType={request.parkingType}
             earlyCheckInHours={request.earlyCheckInHours}

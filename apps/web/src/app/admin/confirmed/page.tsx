@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 export default async function ConfirmedBookingsPage() {
   const staff = await requireStaff();
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.rpc("get_snowaz_admin_dashboard");
+  const { data, error } = await supabase.rpc("get_rechels_admin_dashboard_v2");
   if (error || !data) throw new Error("Confirmed bookings are unavailable.");
   const enquiries = (data as { enquiries: AdminEnquiry[] }).enquiries;
   const canManage = ["admin", "manager"].includes(staff.role);

@@ -22,7 +22,7 @@ scheduled sync before enabling it for guests.
 
 ## Before enabling direct booking
 
-1. Confirm the maximum guest count, sleeping arrangements, cancellation policy, and house rules with Rechel before enabling payment collection. The configured client rules are ₱4,500/night, a 50% down payment, and a separate ₱1,000 refundable security deposit due upon check-in.
+1. Confirm the sleeping arrangements, cancellation policy, and house rules with Rechel before enabling payment collection. The configured capacity is up to 6 adults plus 3 children. The configured client rules are ₱4,500/night, a 50% down payment, and a separate ₱1,000 refundable security deposit due upon check-in.
 2. Verify the phone number, email address, Facebook page, Airbnb listing, and final payment instructions in `apps/web/src/lib/property.ts`.
 3. Use only the host-provided GCash/InstaPay QR in the Rechel's Place payment page; never commit secrets or full banking credentials.
 4. Create a new Supabase project and apply the included migrations only to that new project.

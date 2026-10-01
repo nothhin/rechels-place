@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
 
 const quickFacts: ReadonlyArray<[IconName, string]> = [
   ["bed", "2 Bedrooms"],
-  ["users", "Up to 6 guests"],
+  ["users", "Up to 6 adults + 3 children"],
   ["bed", "5 Beds"],
   ["shower", "2.5 Baths"],
 ];
@@ -84,9 +84,9 @@ export default async function Home() {
           <div className="pwa-video-copy">
             <small>VIDEO TOUR</small>
             <h3>See the space before you arrive.</h3>
-            <p>{propertyProfile.descriptor}, with {propertyProfile.maxGuests} guests, 2 bedrooms, {propertyProfile.bedLabel}, and {propertyProfile.bathroomLabel}.</p>
+            <p>{propertyProfile.descriptor}, for up to {propertyProfile.maxAdults} adults plus {propertyProfile.maxChildren} children, with 2 bedrooms, {propertyProfile.bedLabel}, and {propertyProfile.bathroomLabel}.</p>
             <div className="pwa-video-facts" aria-label="Property details">
-              <span>6 guests</span>
+              <span>6 adults + 3 children</span>
               <span>2 bedrooms</span>
               <span>5 beds</span>
               <span>2.5 baths</span>
@@ -104,7 +104,7 @@ export default async function Home() {
       </section>
 
       <section className="pwa-rooms" id="rooms">
-        <div className="pwa-rooms-heading"><small>SLEEPING SPACES</small><h2>Two bedrooms.<br />One easy stay.</h2><p>The entire condo is available for your group, with five beds and room for up to six guests.</p></div>
+        <div className="pwa-rooms-heading"><small>SLEEPING SPACES</small><h2>Two bedrooms.<br />One easy stay.</h2><p>The entire condo is available for your group, with five beds and room for up to six adults plus three children.</p></div>
         <article><div className="pwa-room-photo"><Image src="/images/rechel-s-place/new-primary-bedroom.webp" alt="Primary bedroom with a queen bed, fresh linens, storage, and city view" fill sizes="(max-width: 700px) 100vw, 50vw" /></div><div className="pwa-room-copy"><span>PRIMARY BEDROOM</span><strong className="pwa-room-price">Included</strong><small className="pwa-room-occupancy">1 queen bed · Part of the entire-condo stay</small><h3>Rest with a view</h3><p>A private bedroom with a queen bed, workspace, storage, and a city-facing view.</p><ul><li>Queen bed</li><li>Dedicated workspace</li><li>Clothing storage</li><li>TV</li></ul></div></article>
         <article><div className="pwa-room-photo"><Image src="/images/rechel-s-place/new-bunk-bedroom.webp" alt="Second bedroom with a wooden bunk bed and city-facing windows" fill sizes="(max-width: 700px) 100vw, 50vw" /></div><div className="pwa-room-copy"><span>SECOND BEDROOM</span><strong className="pwa-room-price">Included</strong><small className="pwa-room-occupancy">Queen bed · Sofa bed · Bunk bed · Floor mattresses</small><h3>Flexible sleeping space</h3><p>Settle in with flexible sleeping arrangements for families and friends sharing the condo.</p><ul><li>Queen bed</li><li>Sofa bed and bunk bed</li><li>Two floor mattresses</li><li>Desk and TV</li></ul></div></article>
       </section>
@@ -129,7 +129,7 @@ export default async function Home() {
 
       <section className="pwa-section pwa-stay-details" id="stay-details">
         <div><small>BEFORE YOU ARRIVE</small><h2>Important stay details</h2><p>Self check-in is available with a keypad. Rechel will confirm current arrival instructions and building details after your request.</p></div>
-        <div className="pwa-stay-details-grid"><article><strong>Check-in</strong><span>{stayDetails.checkIn}</span></article><article><strong>Check-out</strong><span>{stayDetails.checkOut}</span></article><article className="pwa-stay-reminders"><strong>House rules</strong><ul><li>Maximum of 6 guests</li><li>Pets are not allowed</li></ul></article><article className="pwa-stay-contacts"><strong>Need help?</strong>{serviceContacts.map(contact => <a key={contact.label} href={`tel:${contact.phone}`}><span>{contact.label}</span>{contact.name} · {propertyProfile.phoneDisplay}</a>)}</article></div>
+        <div className="pwa-stay-details-grid"><article><strong>Check-in</strong><span>{stayDetails.checkIn}</span></article><article><strong>Check-out</strong><span>{stayDetails.checkOut}</span></article><article className="pwa-stay-reminders"><strong>House rules</strong><ul><li>Maximum of 6 adults plus 3 children</li><li>Pets are not allowed</li></ul></article><article className="pwa-stay-contacts"><strong>Need help?</strong>{serviceContacts.map(contact => <a key={contact.label} href={`tel:${contact.phone}`}><span>{contact.label}</span>{contact.name} · {propertyProfile.phoneDisplay}</a>)}</article></div>
       </section>
 
       <section className="pwa-location" id="location">
@@ -139,7 +139,7 @@ export default async function Home() {
 
       <section className="pwa-booking" id="availability" tabIndex={-1} aria-labelledby="availability-heading">
         <div className="pwa-book-heading"><span>LIVE AVAILABILITY · DIRECT WITH HOST</span><h2 id="availability-heading">Reserve your stay.</h2><p>Choose your preferred dates and contact Rechel directly. The current accommodation rate is {nightlyRate} per night; a {downPayment} down payment secures the stay, and the separate {securityDeposit} refundable security deposit is due upon check-in on that day.</p></div>
-        <div className="pwa-config-card"><span>STAY CONFIGURATION</span><article><div><strong>{propertyProfile.descriptor}</strong><small>{propertyProfile.maxGuests} guests · 2 bedrooms · {propertyProfile.bedLabel} · {propertyProfile.bathroomLabel} · Kitchen · Pool · Keypad</small></div><b>{nightlyRate}/night</b></article><article><div><strong>Top guest favorite</strong><small>{propertyProfile.ratingLabel} from {propertyProfile.reviewCount} Airbnb reviews</small></div><b>Airbnb</b></article></div>
+        <div className="pwa-config-card"><span>STAY CONFIGURATION</span><article><div><strong>{propertyProfile.descriptor}</strong><small>{propertyProfile.maxAdults} adults + {propertyProfile.maxChildren} children · 2 bedrooms · {propertyProfile.bedLabel} · {propertyProfile.bathroomLabel} · Kitchen · Pool · Keypad</small></div><b>{nightlyRate}/night</b></article><article><div><strong>Top guest favorite</strong><small>{propertyProfile.ratingLabel} from {propertyProfile.reviewCount} Airbnb reviews</small></div><b>Airbnb</b></article></div>
         <div className="pwa-booking-policy" aria-label="Booking payment terms">
           <article><b>{nightlyRate}</b><span>nightly rate</span></article>
           <article><b>{downPayment}</b><span>down payment</span></article>

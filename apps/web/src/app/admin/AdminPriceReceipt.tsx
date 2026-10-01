@@ -35,7 +35,7 @@ export function AdminPriceReceipt({ booking }: { booking: AdminEnquiry }) {
       <dl>
         {booking.bookingReference ? <div><dt>Booking reference</dt><dd>{booking.bookingReference}</dd></div> : null}
         <div><dt>Dates</dt><dd>{booking.checkIn} – {booking.checkOut}</dd></div>
-        <div><dt>Stay</dt><dd>{booking.stayNights} night{booking.stayNights === 1 ? "" : "s"} · {booking.guestCount} guest{booking.guestCount === 1 ? "" : "s"}</dd></div>
+        <div><dt>Stay</dt><dd>{booking.stayNights} night{booking.stayNights === 1 ? "" : "s"} · {booking.adultCount ?? booking.guestCount} adults · {booking.childCount ?? 0} children</dd></div>
         <div><dt>Space</dt><dd>{bedroomLabels[booking.bedroomChoice]}</dd></div>
         <div><dt>Nightly rate</dt><dd>{php.format(booking.baseNightlyRateMinor / 100)}</dd></div>
         {booking.additionalGuestCount > 0 ? <div><dt>Additional occupancy<br/><small>Host-confirmed adjustment × {booking.stayNights} night{booking.stayNights === 1 ? "" : "s"}</small></dt><dd>+{php.format(booking.additionalGuestChargeMinor / 100)}</dd></div> : null}

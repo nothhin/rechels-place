@@ -44,6 +44,10 @@ const pricingRpcExecutionPath = fileURLToPath(new URL("../../../supabase/migrati
 const pricingRpcExecution = readFileSync(pricingRpcExecutionPath, "utf8");
 const airbnbSyncHardeningPath = fileURLToPath(new URL("../../../supabase/migrations/20260919000000_airbnb_calendar_sync_hardening.sql", import.meta.url));
 const airbnbSyncHardening = readFileSync(airbnbSyncHardeningPath, "utf8");
+const adultAndChildCapacityPath = fileURLToPath(new URL("../../../supabase/migrations/20261001072731_add_adult_and_child_capacity.sql", import.meta.url));
+const adultAndChildCapacity = readFileSync(adultAndChildCapacityPath, "utf8");
+const legacyOccupancyCompatibilityPath = fileURLToPath(new URL("../../../supabase/migrations/20261001083857_legacy_booking_occupancy_compatibility.sql", import.meta.url));
+const legacyOccupancyCompatibility = readFileSync(legacyOccupancyCompatibilityPath, "utf8");
 
 describe("initial database migration", () => {
   it("enforces a single property settings row", () => {
@@ -300,5 +304,33 @@ describe("Rechel's Place two-way Airbnb calendar sync", () => {
     expect(airbnbSyncHardening).toContain("'recentRuns'");
     expect(airbnbSyncHardening).toContain("revoke all on table public.external_calendar_sync_runs from public, anon, authenticated");
     expect(airbnbSyncHardening).toContain("grant execute on function public.staff_get_snowaz_airbnb_sync_status() to authenticated");
+  });
+});
+
+describe("Rechel's Place adult and child capacity", () => {
+  it("stores and validates the occupancy breakdown", () => {
+    expect(adultAndChildCapacity).toContain("adult_count between 1 and 6");
+    expect(adultAndChildCapacity).toContain("child_count between 0 and 3");
+    expect(adultAndChildCapacity).toContain("guest_count = adult_count + child_count");
+    expect(adultAndChildCapacity).toContain("guest_count between 1 and 9");
+  });
+
+  it("requires the new breakdown in public booking submissions", () => {
+    expect(adultAndChildCapacity).toContain("submit_rechels_booking_request_v3");
+    expect(adultAndChildCapacity).toContain("guests <> adult_count + child_count");
+    expect(adultAndChildCapacity).toContain("bedroom_selection <> 'both_bedrooms'");
+  });
+
+  it("keeps adult and child counts visible in guest and admin records", () => {
+    expect(adultAndChildCapacity).toContain("get_snowaz_deposit_request");
+    expect(adultAndChildCapacity).toContain("'adultCount', b.adult_count");
+    expect(adultAndChildCapacity).toContain("'childCount', b.child_count");
+  });
+
+  it("keeps legacy booking clients compatible during deployment", () => {
+    expect(legacyOccupancyCompatibility).toContain("rechels_normalize_legacy_occupancy");
+    expect(legacyOccupancyCompatibility).toContain("before insert or update of guest_count, adult_count, child_count");
+    expect(legacyOccupancyCompatibility).toContain("new.adult_count := least(new.guest_count, 6)");
+    expect(legacyOccupancyCompatibility).toContain("new.child_count := greatest(new.guest_count - 6, 0)");
   });
 });

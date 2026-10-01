@@ -69,6 +69,8 @@ describe("booking enquiries", () => {
   const request = {
     checkIn: "2026-09-01",
     checkOut: "2026-09-02",
+    adults: "2",
+    children: "0",
     guests: "2",
     bedroomChoice: "both_bedrooms",
     fullName: "Guest Name",
@@ -82,11 +84,13 @@ describe("booking enquiries", () => {
   };
   it("allows an optional email when the required phone number is provided", () =>
     expect(bookingEnquirySchema.safeParse(request).success).toBe(true));
-  it("accepts the entire two-bedroom condo for up to six guests", () =>
+  it("accepts up to six adults plus three children", () =>
     expect(
       bookingEnquirySchema.safeParse({
         ...request,
-        guests: "6",
+        adults: "6",
+        children: "3",
+        guests: "9",
         bedroomChoice: "both_bedrooms",
       }).success,
     ).toBe(true));
@@ -94,9 +98,17 @@ describe("booking enquiries", () => {
     expect(
       bookingEnquirySchema.safeParse({ ...request, bedroomChoice: "bedroom_1" }).success,
     ).toBe(false));
-  it("rejects more than six guests", () =>
+  it("rejects more than six adults", () =>
     expect(
-      bookingEnquirySchema.safeParse({ ...request, guests: "7" }).success,
+      bookingEnquirySchema.safeParse({ ...request, adults: "7", guests: "7" }).success,
+    ).toBe(false));
+  it("rejects more than three children", () =>
+    expect(
+      bookingEnquirySchema.safeParse({ ...request, children: "4", guests: "6" }).success,
+    ).toBe(false));
+  it("rejects a manipulated combined guest count", () =>
+    expect(
+      bookingEnquirySchema.safeParse({ ...request, adults: "2", children: "1", guests: "9" }).success,
     ).toBe(false));
   it("does not accept an alternate preferred contact method", () =>
     expect(
@@ -118,7 +130,8 @@ describe("money calculations", () => {
     const strategy = createRechelsPlacePricingStrategy(pricing);
     expect(strategy.nightlyRateMinor(2, "both_bedrooms")).toBe(450_000);
     expect(strategy.nightlyRateMinor(6, "both_bedrooms")).toBe(450_000);
-    expect(() => strategy.nightlyRateMinor(7, "both_bedrooms")).toThrow(RangeError);
+    expect(strategy.nightlyRateMinor(9, "both_bedrooms")).toBe(450_000);
+    expect(() => strategy.nightlyRateMinor(10, "both_bedrooms")).toThrow(RangeError);
   });
 
   it("defaults new pricing requests to the whole-condo rate", () => {

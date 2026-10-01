@@ -54,11 +54,11 @@ const mobileClasses = {
 export default async function OperationsPage() {
   const staff = await requireStaff(["manager", "admin"]);
   const supabase = await createSupabaseServerClient();
-  let { data, error } = await supabase.rpc("staff_get_snowaz_operations");
+  let { data, error } = await supabase.rpc("staff_get_rechels_operations_v2");
   if (error || !data) {
     // A temporary Data API failure must not immediately blank the workspace.
     await new Promise((resolve) => setTimeout(resolve, 300));
-    ({ data, error } = await supabase.rpc("staff_get_snowaz_operations"));
+    ({ data, error } = await supabase.rpc("staff_get_rechels_operations_v2"));
   }
   if (error || !data) console.error("[admin-operations] load failed", { code: error?.code ?? "missing-data" });
   if (error || !data) throw new Error("Operations data is unavailable.");

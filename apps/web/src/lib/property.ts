@@ -18,7 +18,9 @@ export const propertyProfile = {
   airbnbUrl: "https://www.airbnb.com/rooms/641471953080650447",
   ratingLabel: "4.95 / 5",
   reviewCount: 75,
-  maxGuests: 6,
+  maxAdults: 6,
+  maxChildren: 3,
+  maxGuests: 9,
   bedLabel: "5 beds",
   bathroomLabel: "2.5 baths",
   wifiLabel: "100 Mbps Wi-Fi",
@@ -75,7 +77,7 @@ export const galleryLinks = [
 
 export const amenityHighlights = [
   ["2", "Bedrooms"],
-  ["6", "Guests maximum"],
+  ["6 + 3", "Adults + children"],
   ["100", "Mbps Wi-Fi"],
   ["4.95/5", "Airbnb rating"],
 ] as const;
@@ -317,7 +319,7 @@ export const buildingAmenities = [
 export const houseRules = [
   "Check-in after 2:00 PM",
   "Checkout before 11:00 AM",
-  "Maximum of 6 guests",
+  "Maximum of 6 adults plus 3 children",
   "Pets are not allowed",
 ] as const;
 

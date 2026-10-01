@@ -45,7 +45,7 @@ async function saveBookingRequest(formData: FormData) {
 
   try {
     const { data, error } = await supabase.rpc(
-      "submit_snowaz_booking_request_v2",
+      "submit_rechels_booking_request_v3",
       {
         request_idempotency: parsed.data.idempotencyKey,
         guest_name: parsed.data.fullName,
@@ -54,6 +54,8 @@ async function saveBookingRequest(formData: FormData) {
         arrival: parsed.data.checkIn,
         departure: parsed.data.checkOut,
         guests: parsed.data.guests,
+        adult_count: parsed.data.adults,
+        child_count: parsed.data.children,
         bedroom_selection: parsed.data.bedroomChoice,
         parking_selection: parsed.data.parkingType,
         early_check_in_hours: parsed.data.earlyCheckInHours,
@@ -114,6 +116,8 @@ async function saveBookingRequest(formData: FormData) {
               check_in: parsed.data.checkIn,
               check_out: parsed.data.checkOut,
               guests: parsed.data.guests,
+              adults: parsed.data.adults,
+              children: parsed.data.children,
               bedroom_selection: bedroomLabel,
               special_requests: parsed.data.specialRequests || "None",
             }),
@@ -132,13 +136,28 @@ async function saveBookingRequest(formData: FormData) {
     }
     return { ok: true as const, data: parsed.data, depositToken, ...result };
   } catch (error) {
+    const errorCode =
+      typeof error === "object" && error !== null && "code" in error
+        ? String(error.code)
+        : "";
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : typeof error === "object" && error !== null && "message" in error
+          ? String(error.message)
+          : "";
+    const datesUnavailable = errorMessage
+      .toLowerCase()
+      .includes("dates unavailable");
     console.error("[booking-request] database insert failed", {
-      error: error instanceof Error ? error.name : "unknown",
+      code: errorCode || "unknown",
+      message: errorMessage.slice(0, 160) || "unknown",
     });
     return {
       ok: false as const,
-      message:
-        "Those dates may no longer be available. Refresh the calendar or contact Rechel's Place directly.",
+      message: datesUnavailable
+        ? "Those dates may no longer be available. Refresh the calendar or contact Rechel's Place directly."
+        : "Your booking request could not be submitted right now. Please refresh and try again, or contact Rechel's Place directly.",
     };
   }
 }

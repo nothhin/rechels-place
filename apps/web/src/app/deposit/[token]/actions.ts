@@ -21,7 +21,9 @@ export async function updatePendingGuestCount(
   const parsed = z
     .object({
       token: z.string().refine(isValidDepositToken),
-      guests: z.coerce.number().int().min(1).max(6),
+      adults: z.coerce.number().int().min(1).max(6),
+      children: z.coerce.number().int().min(0).max(3),
+      guests: z.coerce.number().int().min(1).max(9),
       bedroom: z.literal("both_bedrooms"),
       parkingType: z.literal("none"),
       earlyCheckInHours: z.coerce.number().int().min(0).max(0),
@@ -29,13 +31,15 @@ export async function updatePendingGuestCount(
     })
     .safeParse({
       token: formData.get("token"),
+      adults: formData.get("adults"),
+      children: formData.get("children"),
       guests: formData.get("guests"),
       bedroom: formData.get("bedroom"),
       parkingType: formData.get("parkingType"),
       earlyCheckInHours: formData.get("earlyCheckInHours"),
       lateCheckoutHours: formData.get("lateCheckoutHours"),
     });
-  if (!parsed.success)
+  if (!parsed.success || parsed.data.adults + parsed.data.children !== parsed.data.guests)
     return {
       status: "error",
       message: "Choose a valid guest count and bedroom setup.",
@@ -44,10 +48,12 @@ export async function updatePendingGuestCount(
   if (!supabase)
     return { status: "error", message: "The booking service is unavailable." };
   const { data, error } = await supabase.rpc(
-    "update_snowaz_pending_guest_count",
+    "update_rechels_pending_occupancy",
     {
       token_hash: hashDepositToken(parsed.data.token),
       guests: parsed.data.guests,
+      adult_count: parsed.data.adults,
+      child_count: parsed.data.children,
       bedroom_selection: parsed.data.bedroom,
       parking_selection: parsed.data.parkingType,
       early_hours: parsed.data.earlyCheckInHours,

@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Rechel's Place",
     short_name: "Rechel's Place",
     description:
-      "Book Rechel's entire two-bedroom condo in Cagayan de Oro for up to 6 guests.",
+      "Book Rechel's entire two-bedroom condo in Cagayan de Oro for up to 6 adults plus 3 children.",
     start_url: "/",
     display: "standalone",
     background_color: "#f7f3ed",

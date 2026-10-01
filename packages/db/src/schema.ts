@@ -133,6 +133,8 @@ export const bookingRequests = pgTable("booking_requests", {
   checkIn: date("check_in").notNull(),
   checkOut: date("check_out").notNull(),
   guestCount: integer("guest_count").notNull(),
+  adultCount: integer("adult_count").notNull().default(1),
+  childCount: integer("child_count").notNull().default(0),
   bedroomChoice: text("bedroom_choice").notNull(),
   stayNights: integer("stay_nights").notNull(),
   baseNightlyRateMinor: bigint("base_nightly_rate_minor", { mode: "number" }).notNull(),

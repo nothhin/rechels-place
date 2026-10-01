@@ -495,7 +495,7 @@ export async function updateBookingOperations(
       bookingId: z.string().uuid(),
       checkIn: z.string().date(),
       checkOut: z.string().date(),
-      guests: z.coerce.number().int().min(1).max(6),
+      guests: z.coerce.number().int().min(1).max(9),
       bedroom: z.enum(["bedroom_1", "bedroom_2", "both_bedrooms"]),
       stayStatus: z.enum(["upcoming", "checked_in", "checked_out", "no_show"]),
       idType: z.string().trim().max(40).optional(),

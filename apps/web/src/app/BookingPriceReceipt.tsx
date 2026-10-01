@@ -18,6 +18,8 @@ type BookingPriceReceiptProps = {
   checkIn: string;
   checkOut: string;
   guests: number;
+  adults?: number;
+  childCount?: number;
   bedroomChoice?: "bedroom_1" | "bedroom_2" | "both_bedrooms";
   parkingType?: "none" | "car" | "motorcycle";
   earlyCheckInHours?: number;
@@ -45,6 +47,8 @@ export default function BookingPriceReceipt({
   checkIn,
   checkOut,
   guests,
+  adults = guests,
+  childCount = 0,
   bedroomChoice,
   parkingType = "none",
   earlyCheckInHours = 0,
@@ -127,7 +131,7 @@ export default function BookingPriceReceipt({
         </div>
         <div>
           <dt>Guests</dt>
-          <dd>{receipt.guests} pax</dd>
+          <dd>{adults} adult{adults === 1 ? "" : "s"} · {childCount} child{childCount === 1 ? "" : "ren"}</dd>
         </div>
         <div>
           <dt>Bedroom selection</dt>
@@ -137,7 +141,7 @@ export default function BookingPriceReceipt({
               : `${receipt.bedrooms} bedroom${receipt.bedrooms === 1 ? "" : "s"}`}
           </dd>
         </div>
-        <div><dt>Space description</dt><dd>{bedroomChoice === "both_bedrooms" ? "2 bedrooms · 5 beds · 2.5 baths · Up to 6 guests" : "Legacy bedroom selection"}</dd></div>
+        <div><dt>Space description</dt><dd>{bedroomChoice === "both_bedrooms" ? "2 bedrooms · 5 beds · 2.5 baths · Up to 6 adults + 3 children" : "Legacy bedroom selection"}</dd></div>
         <div>
           <dt>Nightly rate</dt>
           <dd>{php.format(receipt.baseNightlyRateMinor / 100)}</dd>
