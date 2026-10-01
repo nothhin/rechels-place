@@ -48,6 +48,8 @@ const adultAndChildCapacityPath = fileURLToPath(new URL("../../../supabase/migra
 const adultAndChildCapacity = readFileSync(adultAndChildCapacityPath, "utf8");
 const legacyOccupancyCompatibilityPath = fileURLToPath(new URL("../../../supabase/migrations/20261001083857_legacy_booking_occupancy_compatibility.sql", import.meta.url));
 const legacyOccupancyCompatibility = readFileSync(legacyOccupancyCompatibilityPath, "utf8");
+const secureEmailDecisionsPath = fileURLToPath(new URL("../../../supabase/migrations/20261001091134_secure_email_booking_decisions.sql", import.meta.url));
+const secureEmailDecisions = readFileSync(secureEmailDecisionsPath, "utf8");
 
 describe("initial database migration", () => {
   it("enforces a single property settings row", () => {
@@ -332,5 +334,21 @@ describe("Rechel's Place adult and child capacity", () => {
     expect(legacyOccupancyCompatibility).toContain("before insert or update of guest_count, adult_count, child_count");
     expect(legacyOccupancyCompatibility).toContain("new.adult_count := least(new.guest_count, 6)");
     expect(legacyOccupancyCompatibility).toContain("new.child_count := greatest(new.guest_count - 6, 0)");
+  });
+});
+
+describe("Rechel's Place secure email booking decisions", () => {
+  it("keeps email actions server-only and idempotent", () => {
+    expect(secureEmailDecisions).toContain("security invoker");
+    expect(secureEmailDecisions).toContain("current_status = 'contacted'");
+    expect(secureEmailDecisions).toContain("current_status = 'declined'");
+    expect(secureEmailDecisions).toContain("from public, anon, authenticated");
+    expect(secureEmailDecisions).toContain("to service_role");
+  });
+
+  it("accepts for payment without falsely confirming a paid stay", () => {
+    expect(secureEmailDecisions).toContain("next_status := 'contacted'");
+    expect(secureEmailDecisions).not.toContain("next_status := 'confirmed'");
+    expect(secureEmailDecisions).toContain("insert into public.audit_log");
   });
 });

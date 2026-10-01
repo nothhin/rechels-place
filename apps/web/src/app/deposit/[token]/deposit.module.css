@@ -186,6 +186,7 @@
   padding: 34px 0;
   text-align: center;
 }
+.waitingState,.declinedState{margin:28px 0;padding:24px;border-radius:18px;background:#fff8eb;border:1px solid #ead8b8}.declinedState{background:#fff2ef;border-color:#eccbc4}.waitingState h2,.declinedState h2{margin:0 0 8px;font-family:var(--font-display),serif;font-size:28px;font-weight:500}.waitingState p,.declinedState p{margin:0;color:#6f675d;line-height:1.65}.declinedState .helpLink{margin-top:18px}
 .complete > span {
   margin: auto;
   display: grid;
