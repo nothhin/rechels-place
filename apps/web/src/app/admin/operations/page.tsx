@@ -21,7 +21,7 @@ import AirbnbCalendarSyncPanel, {
 import { isAirbnbCalendarConfigured } from "@/lib/server/airbnb-calendar";
 import styles from "../admin.module.css";
 export const metadata: Metadata = {
-  title: "Housekeeping & finance | Rechel's Place",
+  title: "Payments & tasks | Rechel's Place",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";
@@ -112,7 +112,7 @@ export default async function OperationsPage() {
         <header className={styles.topbar}>
           <AdminMobileNav classes={mobileClasses} />
           <div>
-            <span>Operations & finance</span>
+            <span>Payments & tasks</span>
             <strong>Live booking controls</strong>
           </div>
           <div className={styles.adminIdentity}>
@@ -130,7 +130,7 @@ export default async function OperationsPage() {
           <section className={styles.welcome}>
             <div>
               <p className={styles.eyebrow}>Rechel’s Place control center</p>
-              <h1>Operations & finance.</h1>
+              <h1>Payments & tasks.</h1>
               <p>
                 Review stays, verify guests, record payments, block dates, and
                 track follow-ups from one workspace.

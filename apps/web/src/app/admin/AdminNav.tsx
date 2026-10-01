@@ -8,12 +8,12 @@ import { createPortal } from "react-dom";
 import { propertyLogoSrc } from "@/lib/property";
 
 const navigation = [
-  { label: "Overview", href: "/admin#overview", id: "overview" },
-  { label: "Stay enquiries", href: "/admin#booking-requests", id: "booking-requests" },
-  { label: "Stay calendar", href: "/admin#calendar", id: "calendar" },
-  { label: "Confirmed stays", href: "/admin/confirmed", id: "confirmed" },
-  { label: "Housekeeping & finance", href: "/admin/operations", id: "operations" },
-  { label: "Price management", href: "/admin/pricing", id: "pricing" },
+  { label: "Home", href: "/admin#overview", id: "overview" },
+  { label: "Booking requests", href: "/admin#booking-requests", id: "booking-requests" },
+  { label: "Calendar", href: "/admin#calendar", id: "calendar" },
+  { label: "Upcoming guests", href: "/admin/confirmed", id: "confirmed" },
+  { label: "Payments & tasks", href: "/admin/operations", id: "operations" },
+  { label: "Rates & fees", href: "/admin/pricing", id: "pricing" },
 ] as const;
 
 function useActiveSection() {
@@ -61,11 +61,11 @@ export function AdminMobileNav({ classes }: { classes: MobileNavClasses }) {
 export function AdminBottomNav({ className, activeClassName }: { className: string; activeClassName: string }) {
   const active = useActiveSection();
   const items = [
-    { label: "Overview", href: "/admin#overview", id: "overview", icon: "home" },
+    { label: "Home", href: "/admin#overview", id: "overview", icon: "home" },
     { label: "Calendar", href: "/admin#calendar", id: "calendar", icon: "calendar" },
-    { label: "Guests", href: "/admin#booking-requests", id: "booking-requests", icon: "users" },
-    { label: "Operations", href: "/admin/operations", id: "operations", icon: "locks" },
-    { label: "Pricing", href: "/admin/pricing", id: "pricing", icon: "menu" },
+    { label: "Requests", href: "/admin#booking-requests", id: "booking-requests", icon: "users" },
+    { label: "Payments", href: "/admin/operations", id: "operations", icon: "locks" },
+    { label: "Rates", href: "/admin/pricing", id: "pricing", icon: "menu" },
   ] as const;
   return <nav className={className} aria-label="Mobile host workspace">{items.map(item => <Link prefetch className={active === item.id ? activeClassName : undefined} href={item.href} key={item.id}><AdminNavIcon name={item.icon} /><small>{item.label}</small></Link>)}</nav>;
 }

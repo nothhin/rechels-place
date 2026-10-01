@@ -12,7 +12,7 @@ import { propertyLogoSrc } from "@/lib/property";
 import styles from "../admin.module.css";
 
 export const metadata: Metadata = {
-  title: "Confirmed bookings | Rechel's Place",
+  title: "Upcoming guests | Rechel's Place",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";
@@ -46,12 +46,12 @@ export default async function ConfirmedBookingsPage() {
     <section className={styles.workspace}>
       <header className={styles.topbar}>
         <AdminMobileNav classes={classes}/>
-        <div><span>Confirmed stays</span><strong>Verified guest bookings</strong></div>
+        <div><span>Upcoming guests</span><strong>Confirmed bookings</strong></div>
         <div className={styles.adminIdentity}><span>{staff.email.slice(0,2).toUpperCase()}</span><div><strong>{staff.email}</strong><small>{staff.role.replace("_"," ")}</small></div><form action={signOut}><button type="submit">Sign out</button></form></div>
       </header>
       <div className={styles.content}>
         <section className={styles.welcome}>
-          <div><p className={styles.eyebrow}>Front desk</p><h1>Confirmed bookings.</h1><p>Bookings move here automatically after the required payment is verified.</p></div>
+          <div><p className={styles.eyebrow}>Guest stays</p><h1>Upcoming guests.</h1><p>These bookings are confirmed after the required payment has been verified.</p></div>
           <Link className={styles.adminBackLink} href="/admin">← Back to dashboard</Link>
         </section>
         <ConfirmedBookingsPanel bookings={enquiries} canManage={canManage}/>

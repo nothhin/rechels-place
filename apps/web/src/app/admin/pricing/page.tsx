@@ -11,7 +11,7 @@ import PricingManagementClient from "./PricingManagementClient";
 import styles from "../admin.module.css";
 
 export const metadata: Metadata = {
-  title: "Price management | Rechel's Place",
+  title: "Rates & fees | Rechel's Place",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";
@@ -43,12 +43,12 @@ export default async function PriceManagementPage() {
     <section className={styles.workspace}>
       <header className={styles.topbar}>
         <AdminMobileNav classes={classes} />
-        <div><span>Price management</span><strong>One source of truth for every stay</strong></div>
+        <div><span>Rates & fees</span><strong>Prices for new bookings</strong></div>
         <div className={styles.adminIdentity}><span>{staff.email.slice(0, 2).toUpperCase()}</span><div><strong>{staff.email}</strong><small>{staff.role.replace("_", " ")}</small></div><form action={signOut}><button type="submit">Sign out</button></form></div>
       </header>
       <div className={styles.content}>
         <section className={`${styles.welcome} ${styles.pricingIntro}`}>
-          <div><p className={styles.eyebrow}>Protected settings</p><h1>Price management.</h1><p>Update the active rates used by new estimates, booking requests, receipts, and host operations. Existing bookings keep their saved price snapshot.</p></div>
+          <div><p className={styles.eyebrow}>Booking prices</p><h1>Rates & fees.</h1><p>Change the prices used for new bookings. Existing bookings keep the prices already agreed with the guest.</p></div>
           <Link className={styles.adminBackLink} href="/admin">← Back to dashboard</Link>
         </section>
         <PricingManagementClient pricing={staffPricing.pricing} history={staffPricing.history} />

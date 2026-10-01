@@ -74,6 +74,10 @@ export default async function AdminDashboard({
   const confirmed = active.filter((item) => item.status === "confirmed");
   const requests = active.filter((item) => item.status !== "confirmed");
   const arrivals = confirmed.filter((item) => item.checkIn === today).length;
+  const departures = confirmed.filter((item) => item.checkOut === today).length;
+  const paymentsToVerify = requests.filter(
+    (item) => item.depositStatus === "submitted",
+  ).length;
   const staying = confirmed.filter(
     (item) => item.checkIn <= today && item.checkOut > today,
   ).length;
@@ -127,9 +131,9 @@ export default async function AdminDashboard({
           <AdminFlashAlert saved={params.saved} error={params.error} />
           <section id="overview" className={styles.welcome}>
             <div>
-              <p className={styles.eyebrow}>Rechel’s Place operations</p>
+              <p className={styles.eyebrow}>Today at Rechel’s Place</p>
               <h1>Good day.</h1>
-            <p>One welcoming home, one live calendar, and one clear guest journey.</p>
+              <p>Start with the items below. The most important task is shown first.</p>
             </div>
             <div className={styles.liveBadge}>
               <strong>System online</strong>
@@ -140,10 +144,27 @@ export default async function AdminDashboard({
             </div>
           </section>
           <section className={styles.adminQuickActions} aria-label="Quick host actions">
-            <Link href="#booking-requests"><span aria-hidden="true">＋</span><small>New enquiry</small></Link>
+            <Link href="#booking-requests"><span aria-hidden="true">＋</span><small>Booking requests</small></Link>
             <Link href="#calendar"><span aria-hidden="true">▣</span><small>Block dates</small></Link>
-            <Link href="/admin/confirmed"><span aria-hidden="true">✓</span><small>Confirmed stays</small></Link>
-            <Link href="/admin/pricing"><span aria-hidden="true">₱</span><small>Price management</small></Link>
+            <Link href="/admin/confirmed"><span aria-hidden="true">✓</span><small>Upcoming guests</small></Link>
+            <Link href="/admin/pricing"><span aria-hidden="true">₱</span><small>Rates & fees</small></Link>
+          </section>
+          <section className={styles.attentionPanel} aria-labelledby="attention-title">
+            <div className={styles.attentionHeader}>
+              <div><p className={styles.eyebrow}>Your next steps</p><h2 id="attention-title">Needs your attention</h2></div>
+              <span>{requests.length + arrivals + departures} items</span>
+            </div>
+            <div className={styles.attentionList}>
+              <Link href="#booking-requests" data-urgent={requests.length > 0}>
+                <span aria-hidden="true">1</span><div><strong>{requests.length ? `${requests.length} booking ${requests.length === 1 ? "request needs" : "requests need"} a response` : "No new booking requests"}</strong><small>{requests.length ? "Review the guest details and choose the next step." : "You are all caught up."}</small></div><b>{requests.length ? "Review" : "Done"}</b>
+              </Link>
+              <Link href="#booking-requests" data-urgent={paymentsToVerify > 0}>
+                <span aria-hidden="true">2</span><div><strong>{paymentsToVerify ? `${paymentsToVerify} payment ${paymentsToVerify === 1 ? "is" : "are"} ready to verify` : "No payments waiting for verification"}</strong><small>{paymentsToVerify ? "Check the payment before confirming the stay." : "Nothing to verify right now."}</small></div><b>{paymentsToVerify ? "Verify" : "Done"}</b>
+              </Link>
+              <Link href="/admin/confirmed" data-urgent={arrivals + departures > 0}>
+                <span aria-hidden="true">3</span><div><strong>{arrivals} arriving · {departures} checking out today</strong><small>Open the guest list for contact and payment details.</small></div><b>View</b>
+              </Link>
+            </div>
           </section>
           <section className={styles.sanctuaryCard} aria-label="Property status">
             <div className={styles.sanctuaryHeader}><div><p className={styles.eyebrow}>Sanctuary status</p><h2>Avida Aspira Tower 1 · Two-bedroom condo</h2></div><span className={styles.statusPill}>LIVE</span></div>
@@ -152,12 +173,12 @@ export default async function AdminDashboard({
       <section className={styles.metricsGrid} aria-label="Property summary">
             {[
               {
-            label: "Stay enquiries",
+            label: "Booking requests",
                 value: requests.length,
-                note: "Awaiting host action",
+                note: "Need your response",
               },
               {
-                label: "Confirmed stays",
+                label: "Upcoming guests",
                 value: confirmed.length,
                 note: "Verified bookings",
               },
@@ -180,7 +201,7 @@ export default async function AdminDashboard({
             ))}
       </section>
       <Link className={styles.confirmedStaysButton} href="/admin/confirmed">
-        Open confirmed stays <span>{confirmed.length}</span>
+        Open upcoming guests <span>{confirmed.length}</span>
       </Link>
       <BookingRequestsPanel enquiries={enquiries} canManage={canManage} />
           <AdminCalendar
