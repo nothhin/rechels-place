@@ -37,6 +37,7 @@ export const galleryImages = [
   { src: "/images/rechel-s-place/new-kitchen.webp", alt: "Bright white kitchen with refrigerator, microwave, sink, and cooking range", label: "FULL KITCHEN", title: "Everything you need to cook." },
   { src: "/images/rechel-s-place/new-bathroom-laundry.webp", alt: "Bathroom with enclosed shower, toilet, sink, washing machine, and laundry basket", label: "BATHROOM & LAUNDRY", title: "Freshen up and travel light." },
   { src: "/images/rechel-s-place/new-dining-detail.webp", alt: "Dining table set with blue placemats and a white floral centerpiece", label: "DINING DETAILS", title: "A welcoming table for every stay." },
+  { src: "/images/rechel-s-place/new-dining-kitchen-wide.webp", alt: "Dining table set for six in front of the full kitchen", label: "DINING & KITCHEN", title: "Space to share every meal." },
   { src: "/images/rechel-s-place/new-open-plan-dining-01.webp", alt: "Open-plan dining table, kitchen, living room, and bright city view", label: "THE WHOLE HOME", title: "Easy living from room to room." },
   { src: "/images/rechel-s-place/listing-06.webp", alt: "Open dining area beside the kitchen", label: "DINING AREA", title: "Make room for everyone." },
   { src: "/images/rechel-s-place/listing-16.webp", alt: "Bedroom with a bed beside a bright city view", label: "PRIMARY BEDROOM", title: "Wake up to the city." },
@@ -57,8 +58,8 @@ export const heroImages = [
   galleryImages[3],
   galleryImages[4],
   galleryImages[5],
-  galleryImages[7],
   galleryImages[8],
+  galleryImages[9],
 ] as const;
 
 export const galleryVideo = {
