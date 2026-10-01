@@ -29,8 +29,15 @@ export const propertyProfile = {
 } as const;
 
 export const galleryImages = [
+  { src: "/images/rechel-s-place/new-open-plan-dining-02.webp", alt: "Bright open-plan dining room, kitchen, and city-facing living area", label: "OPEN-PLAN HOME", title: "Gather, dine, and unwind." },
   { src: "/images/rechel-s-place/listing-01.webp", alt: "Living room with sofa, TV, dining area, and city view", label: "THE LIVING ROOM", title: "Room to settle in." },
+  { src: "/images/rechel-s-place/new-primary-bedroom.webp", alt: "Primary bedroom prepared with a queen bed, fresh linens, storage, and city view", label: "PRIMARY BEDROOM", title: "A bright room for slow mornings." },
   { src: "/images/rechel-s-place/listing-13.webp", alt: "Living room looking toward the dining area and city-facing windows", label: "CITY-FACING WINDOWS", title: "Light from every angle." },
+  { src: "/images/rechel-s-place/new-bunk-bedroom.webp", alt: "Second bedroom with a wooden bunk bed beside wide city-facing windows", label: "SECOND BEDROOM", title: "Flexible space for your group." },
+  { src: "/images/rechel-s-place/new-kitchen.webp", alt: "Bright white kitchen with refrigerator, microwave, sink, and cooking range", label: "FULL KITCHEN", title: "Everything you need to cook." },
+  { src: "/images/rechel-s-place/new-bathroom-laundry.webp", alt: "Bathroom with enclosed shower, toilet, sink, washing machine, and laundry basket", label: "BATHROOM & LAUNDRY", title: "Freshen up and travel light." },
+  { src: "/images/rechel-s-place/new-dining-detail.webp", alt: "Dining table set with blue placemats and a white floral centerpiece", label: "DINING DETAILS", title: "A welcoming table for every stay." },
+  { src: "/images/rechel-s-place/new-open-plan-dining-01.webp", alt: "Open-plan dining table, kitchen, living room, and bright city view", label: "THE WHOLE HOME", title: "Easy living from room to room." },
   { src: "/images/rechel-s-place/listing-06.webp", alt: "Open dining area beside the kitchen", label: "DINING AREA", title: "Make room for everyone." },
   { src: "/images/rechel-s-place/listing-16.webp", alt: "Bedroom with a bed beside a bright city view", label: "PRIMARY BEDROOM", title: "Wake up to the city." },
   { src: "/images/rechel-s-place/listing-20.webp", alt: "Bedroom with a wide window and city skyline view", label: "A ROOM WITH A VIEW", title: "Slow mornings, higher up." },
@@ -49,9 +56,9 @@ export const heroImages = [
   galleryImages[2],
   galleryImages[3],
   galleryImages[4],
-  galleryImages[6],
+  galleryImages[5],
   galleryImages[7],
-  galleryImages[10],
+  galleryImages[8],
 ] as const;
 
 export const galleryVideo = {
