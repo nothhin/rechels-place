@@ -113,9 +113,6 @@ export default async function DepositPage({
     "partially_withheld",
     "forfeited",
   ].includes(request.depositStatus);
-  const awaitingHostReview = request.bookingStatus === "pending";
-  const declined = ["declined", "cancelled"].includes(request.bookingStatus);
-  const paymentAvailable = request.bookingStatus === "contacted" && !finished;
   const bookingReference = request.bookingReference || (/^[A-Z]+-[A-Z0-9]{8}$/.test(query.reference ?? "") ? query.reference : undefined);
   return (
     <main className={styles.shell}>
@@ -133,21 +130,9 @@ export default async function DepositPage({
             checkOut: request.checkOut,
           }}
         />
-        <p className={styles.eyebrow}>
-          {declined
-            ? "Booking request closed"
-            : awaitingHostReview
-              ? "Awaiting host review"
-              : request.bookingStatus === "confirmed"
-                ? "Stay confirmed"
-                : "Request accepted"}
-        </p>
+        <p className={styles.eyebrow}>Approved booking request</p>
         <h1>
-          {declined
-            ? "This request was not accepted."
-            : awaitingHostReview
-              ? "Your request is being reviewed."
-              : finished
+          {finished
             ? request.depositStatus === "refunded"
               ? "Down payment refunded."
               : "Payment details received."
@@ -164,18 +149,7 @@ export default async function DepositPage({
           </span>
         </div>
         <DeviceStatusAlerts status={request.depositStatus} />
-        {awaitingHostReview ? (
-          <section className={styles.waitingState} role="status">
-            <h2>Rechel’s Place is reviewing your request.</h2>
-            <p>This page updates automatically. If the host accepts, the secure payment instructions will appear here—there is no need to submit another booking.</p>
-          </section>
-        ) : declined ? (
-          <section className={styles.declinedState} role="status">
-            <h2>No payment is required.</h2>
-            <p>This request has been declined or cancelled. Please choose other dates or contact Rechel’s Place if you need help.</p>
-            <Link className={styles.helpLink} href="/#availability">Check other dates</Link>
-          </section>
-        ) : paymentAvailable ? (
+        {!finished ? (
           <GuestCountEditor
             token={token}
             checkIn={request.checkIn}
@@ -234,7 +208,7 @@ export default async function DepositPage({
               additional information is needed.
             </p>
           </section>
-        ) : paymentAvailable ? (
+        ) : (
           <>
             <section className={styles.instructions}>
               <h2>Pay the {request.bookingSnapshot.downPaymentPercent}% down payment</h2>
@@ -312,7 +286,7 @@ export default async function DepositPage({
               </div>
             </section>
           </>
-        ) : null}
+        )}
         <footer id="cancellation-help">
           <p>
             This private link becomes read-only after payment and expires 30

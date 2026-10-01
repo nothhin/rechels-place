@@ -7,7 +7,6 @@ import {
   createDepositToken,
   hashDepositToken,
 } from "@/lib/server/deposit-token";
-import { createBookingEmailActionToken } from "@/lib/server/booking-email-action-token";
 import { createPublicSupabaseClient } from "@/lib/supabase/public-server";
 
 const phpCurrency = new Intl.NumberFormat("en-PH", {
@@ -99,7 +98,6 @@ async function saveBookingRequest(formData: FormData) {
       };
     }
     const result = {
-      bookingId: booking.booking_id as string,
       bookingReference: booking.booking_reference as string,
       depositExpiresAt: booking.deposit_expires_at as string,
       totalMinor: Number(
@@ -113,20 +111,6 @@ async function saveBookingRequest(formData: FormData) {
     const checkInTime = Date.parse(`${parsed.data.checkIn}T00:00:00Z`);
     const checkOutTime = Date.parse(`${parsed.data.checkOut}T00:00:00Z`);
     const nights = Math.round((checkOutTime - checkInTime) / 86_400_000);
-    const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-    const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-    const siteUrl = configuredSiteUrl || (vercelHost ? `https://${vercelHost}` : "https://rechels-place-cdo.vercel.app");
-    const actionExpiry = new Date(result.depositExpiresAt);
-    const acceptToken = createBookingEmailActionToken({
-      bookingId: result.bookingId,
-      decision: "accept",
-      expiresAt: actionExpiry,
-    });
-    const declineToken = createBookingEmailActionToken({
-      bookingId: result.bookingId,
-      decision: "decline",
-      expiresAt: actionExpiry,
-    });
     const notificationPayload = {
       bookingReference: result.bookingReference,
       guestName: parsed.data.fullName,
@@ -146,8 +130,6 @@ async function saveBookingRequest(formData: FormData) {
       total: phpCurrency.format(result.totalMinor / 100),
       depositDue: phpCurrency.format(result.totalMinor / 200),
       specialRequests: parsed.data.specialRequests || "None",
-      acceptUrl: new URL(`/booking-action/${acceptToken}`, siteUrl).toString(),
-      declineUrl: new URL(`/booking-action/${declineToken}`, siteUrl).toString(),
     };
 
     if (webhookUrl) {
