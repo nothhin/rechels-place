@@ -17,7 +17,7 @@ import {
   type RechelsPricingConfig,
 } from "@uppadar-hollie/shared/pricing";
 import { propertyLogoSrc, propertyProfile } from "@/lib/property";
-import { showError, showSuccess } from "@/lib/sweetalert";
+import { showError } from "@/lib/sweetalert";
 import { RememberBooking, rememberBooking } from "./BookingMemory";
 import UiIcon from "./UiIcon";
 import BookingPriceReceipt from "./BookingPriceReceipt";
@@ -141,9 +141,6 @@ export default function BookingModal({
         checkOut: selectedCheckOut,
       });
       window.dispatchEvent(new Event("snowaz:availability-changed"));
-      void showSuccess(
-        "Booking request received. The host will review your dates.",
-      );
       window.location.assign(state.depositLink ?? "/booking-status");
     }
     if (state.status === "error" && state.message)
