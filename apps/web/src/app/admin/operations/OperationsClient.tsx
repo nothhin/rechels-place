@@ -1,6 +1,7 @@
 "use client";
 import {
   useActionState,
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -74,16 +75,19 @@ export type OpsNotification = {
   dueAt: string;
   attempts: number;
 };
-function useActionNotice(state: OperationActionState) {
+function useActionNotice(state: OperationActionState, onSuccess?: () => void) {
   const router = useRouter();
   useEffect(() => {
     if (state.status === "success") {
-      void showSuccess(state.message ?? "Saved.");
+      void (async () => {
+        await showSuccess(state.message ?? "Saved.");
+        onSuccess?.();
+      })();
       window.dispatchEvent(new Event("snowaz:admin-changed"));
       router.refresh();
     } else if (state.status === "error")
       void showError(state.message ?? "Could not save.");
-  }, [state, router]);
+  }, [state, router, onSuccess]);
 }
 function BookingModal({
   booking,
@@ -101,8 +105,8 @@ function BookingModal({
     initial,
   );
   const [paymentMethod, setPaymentMethod] = useState("cash");
-  useActionNotice(payState);
-  useActionNotice(reverseState);
+  useActionNotice(payState, onClose);
+  useActionNotice(reverseState, onClose);
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -258,6 +262,7 @@ export function BookingOperations({ bookings }: { bookings: OpsBooking[] }) {
   const [filter, setFilter] = useState("active");
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const closeSelected = useCallback(() => setSelectedId(null), []);
   const selected = selectedId
     ? (bookings.find((item) => item.id === selectedId) ?? null)
     : null;
@@ -404,7 +409,7 @@ export function BookingOperations({ bookings }: { bookings: OpsBooking[] }) {
         </div>
       )}
       {selected ? (
-        <BookingModal booking={selected} onClose={() => setSelectedId(null)} />
+        <BookingModal booking={selected} onClose={closeSelected} />
       ) : null}
     </section>
   );

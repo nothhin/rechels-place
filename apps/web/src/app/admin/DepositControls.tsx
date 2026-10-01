@@ -8,7 +8,7 @@ import { confirmAction, showError, showSuccess } from "@/lib/sweetalert";
 
 const initialState: DepositActionState = { status: "idle" };
 
-export function DepositControls({ bookingId, bookingStatus = "pending", depositStatus, canManage, downPaymentMinor, securityDepositAmountMinor, totalMinor }: { bookingId: string; bookingStatus?: string; depositStatus: string; canManage: boolean; downPaymentMinor?: number; securityDepositAmountMinor?: number; totalMinor?: number }) {
+export function DepositControls({ bookingId, bookingStatus = "pending", depositStatus, canManage, downPaymentMinor, securityDepositAmountMinor, totalMinor, onSuccess }: { bookingId: string; bookingStatus?: string; depositStatus: string; canManage: boolean; downPaymentMinor?: number; securityDepositAmountMinor?: number; totalMinor?: number; onSuccess?: () => void }) {
   const [startState, startAction, startPending] = useActionState(startDepositRequest, initialState);
   const [verifyState, verifyAction, verifyPending] = useActionState(verifyDeposit, initialState);
   const [recordState, recordAction, recordPending] = useActionState(recordAndVerifyDeposit, initialState);
@@ -26,9 +26,14 @@ export function DepositControls({ bookingId, bookingStatus = "pending", depositS
   useEffect(() => {
     if (result.status === "success") {
       window.dispatchEvent(new Event("snowaz:admin-changed"));
-      if (result.message) void showSuccess(result.message);
+      if (!result.link) {
+        void (async () => {
+          if (result.message) await showSuccess(result.message);
+          onSuccess?.();
+        })();
+      } else if (result.message) void showSuccess(result.message);
     } else if (result.status === "error" && result.message) void showError(result.message);
-  }, [result.status, result.message, result.link]);
+  }, [result.status, result.message, result.link, onSuccess]);
 
   const confirmStatusChange = async (event: React.FormEvent<HTMLFormElement>, kind: "decline" | "cancel") => {
     const form = event.currentTarget;
